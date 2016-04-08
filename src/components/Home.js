@@ -1,9 +1,12 @@
 'use strict';
 
+const ArticleList = require('./ArticleList');
 const React = require('react');
 const Router = require('react-router');
 const agent = require('../agent');
 const store = require('../store');
+
+const Promise = global.Promise;
 
 const Tags = props => {
   const tags = props.tags;
@@ -28,6 +31,67 @@ const Tags = props => {
   }
 }
 
+class Banner extends React.Component {
+  render() {
+    if (this.props.token) {
+      return null;
+    }
+    return (
+      <div className="banner">
+        <div className="container">
+          <h1 className="logo-font">
+            {this.props.appName.toLowerCase()}
+          </h1>
+          <p>A place to share your knowledge.</p>
+        </div>
+      </div>
+    );
+  }
+};
+
+class YourFeedTab extends React.Component {
+  render() {
+    if (this.props.token) {
+      return (
+        <li className="nav-item">
+          <a href="" className={ this.props.tab === 'feed' ? 'nav-link active' : 'nav-link' }>
+            Your Feed
+          </a>
+        </li>
+      );
+    }
+    return null;
+  }
+};
+
+const GlobalFeedTab = props => {
+  return (
+    <li className="nav-item">
+      <a href="" className={ props.tab === 'all' ? 'nav-link active' : 'nav-link' }>
+        Global Feed
+      </a>
+    </li>
+  );
+}
+
+const MainView = props => {
+  return (
+    <div className="col-md-9">
+      <div className="feed-toggle">
+        <ul className="nav nav-pills outline-active">
+
+          <YourFeedTab token={props.token} tab={props.tab} />
+
+          <GlobalFeedTab tab={props.tab} />
+
+        </ul>
+      </div>
+
+      <ArticleList articles={props.articles} loading={props.loading} />
+    </div>
+  );
+};
+
 class Home extends React.Component {
   constructor() {
     super();
@@ -40,7 +104,7 @@ class Home extends React.Component {
 
     store.dispatch({
       type: 'HOME_PAGE_LOADED',
-      payload: agent.Tags.getAll()
+      payload: Promise.all([agent.Tags.getAll(), agent.Articles.feed()])
     });
   }
 
@@ -53,17 +117,15 @@ class Home extends React.Component {
     return (
       <div className="home-page">
 
-        <div className="banner">
-          <div className="container">
-            <h1 className="logo-font">
-              {this.state.appName}
-            </h1>
-            <p>A place to share your knowledge.</p>
-          </div>
-        </div>
+        <Banner token={this.state.token} appName={this.state.appName} />
 
         <div className="container page">
           <div className="row">
+            <MainView
+              token={this.state.token}
+              tab={this.state.listConfig}
+              articles={this.state.articles}
+              loading={this.state.loading} />
 
             <div className="col-md-3">
               <div className="sidebar">

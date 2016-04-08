@@ -11,7 +11,7 @@ class Header extends React.Component {
         <div className="container">
 
           <a className="navbar-brand">
-            {this.props.state.appName}
+            {this.props.state.appName.toLowerCase()}
           </a>
 
           <ul className="nav navbar-nav pull-xs-right">

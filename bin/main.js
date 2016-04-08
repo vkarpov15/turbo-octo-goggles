@@ -63,8 +63,8 @@
 
 	var Header = __webpack_require__(242);
 	var Home = __webpack_require__(243);
-	var Login = __webpack_require__(244);
-	var Register = __webpack_require__(246);
+	var Login = __webpack_require__(246);
+	var Register = __webpack_require__(248);
 
 	var App = function (_React$Component) {
 	  _inherits(App, _React$Component);
@@ -79,6 +79,17 @@
 	  }
 
 	  _createClass(App, [{
+	    key: 'componentWillMount',
+	    value: function componentWillMount() {
+	      store.dispatch({
+	        type: 'APP_LOAD',
+	        token: window.localStorage.getItem('jwt')
+	      });
+	      if (window.localStorage.getItem('jwt')) {
+	        agent.setToken(window.localStorage.getItem('jwt'));
+	      }
+	    }
+	  }, {
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
 	      var _this2 = this;
@@ -25090,15 +25101,23 @@
 	var responseBody = function responseBody(res) {
 	  return res.body;
 	};
+
+	var token = null;
+	var tokenPlugin = function tokenPlugin(req) {
+	  if (token) {
+	    req.set('authorization', 'Token ' + token);
+	  }
+	};
+
 	var requests = {
 	  get: function get(url) {
-	    return superagent.get('' + API_ROOT + url).then(responseBody);
+	    return superagent.get('' + API_ROOT + url).use(tokenPlugin).then(responseBody);
 	  },
 	  put: function put(url, body) {
-	    return superagent.put('' + API_ROOT + url, body).then(responseBody);
+	    return superagent.put('' + API_ROOT + url, body).use(tokenPlugin).then(responseBody);
 	  },
 	  post: function post(url, body) {
-	    return superagent.post('' + API_ROOT + url, body).then(responseBody);
+	    return superagent.post('' + API_ROOT + url, body).use(tokenPlugin).then(responseBody);
 	  }
 	};
 
@@ -25117,9 +25136,19 @@
 	  }
 	};
 
+	var Articles = {
+	  feed: function feed() {
+	    return requests.get('/articles/feed?limit=10&offset=0');
+	  }
+	};
+
 	module.exports = {
+	  Articles: Articles,
 	  Auth: Auth,
-	  Tags: Tags
+	  Tags: Tags,
+	  setToken: function setToken(_token) {
+	    token = _token;
+	  }
 	};
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
@@ -27024,7 +27053,9 @@
 	var middleware = __webpack_require__(240);
 	var reducer = __webpack_require__(241);
 
-	var store = Redux.createStore(reducer, Redux.applyMiddleware(middleware));
+	var applyMiddleware = Redux.applyMiddleware(middleware.promiseMiddleware, middleware.localStorageMiddleware);
+
+	var store = Redux.createStore(reducer, applyMiddleware);
 
 	module.exports = store;
 
@@ -27796,11 +27827,13 @@
 
 /***/ },
 /* 240 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = function (store) {
+	var agent = __webpack_require__(216);
+
+	exports.promiseMiddleware = function (store) {
 	  return function (next) {
 	    return function (action) {
 	      if (isPromise(action.payload)) {
@@ -27814,7 +27847,23 @@
 	          action.payload = error.response.body;
 	          store.dispatch(action);
 	        });
+
+	        store.dispatch({ type: 'LOADING' });
+
 	        return;
+	      }
+
+	      next(action);
+	    };
+	  };
+	};
+
+	exports.localStorageMiddleware = function (store) {
+	  return function (next) {
+	    return function (action) {
+	      if (action.type === 'REGISTER' || action.type === 'LOGIN') {
+	        window.localStorage.setItem('jwt', action.payload.user.token);
+	        agent.setToken(action.payload.user.token);
 	      }
 
 	      next(action);
@@ -27834,7 +27883,7 @@
 
 	var defaultState = {
 	  appName: 'Conduit2',
-	  authed: false
+	  token: null
 	};
 
 	module.exports = function () {
@@ -27842,6 +27891,9 @@
 	  var action = arguments[1];
 
 	  switch (action.type) {
+	    case 'APP_LOAD':
+	      state.token = action.token || null;
+	      break;
 	    case 'REDIRECT':
 	      state.redirectTo = null;
 	      break;
@@ -27849,25 +27901,26 @@
 	      state[action.key] = action.value;
 	      break;
 	    case 'HOME_PAGE_LOADED':
-	      state.tags = action.payload.tags;
-	      break;
-	    case 'HOME_PAGE_UNLOADED':
-	      delete state.tags;
-	      break;
-	    case 'LOGIN':
-	      if (action.error) {
-	        state.errors = action.payload.errors;
+	      state.tags = action.payload[0].tags;
+	      state.articles = action.payload[1].articles;
+	      if (state.token) {
+	        state.listConfig = 'feed';
 	      } else {
-	        state.redirectTo = '/';
-	        state.authed = true;
+	        state.listConfig = 'all';
 	      }
 	      break;
+	    case 'HOME_PAGE_UNLOADED':
+	      delete state.articles;
+	      delete state.tags;
+	      delete state.listConfig;
+	      break;
+	    case 'LOGIN':
 	    case 'REGISTER':
 	      if (action.error) {
 	        state.errors = action.payload.errors;
 	      } else {
 	        state.redirectTo = '/';
-	        state.authed = true;
+	        state.token = action.payload.user.token;
 	      }
 	      break;
 	    case 'LOGIN_PAGE_UNLOADED':
@@ -27923,7 +27976,7 @@
 	          React.createElement(
 	            'a',
 	            { className: 'navbar-brand' },
-	            this.props.state.appName
+	            this.props.state.appName.toLowerCase()
 	          ),
 	          React.createElement(
 	            'ul',
@@ -27970,7 +28023,7 @@
 /* 243 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -27980,10 +28033,13 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+	var ArticleList = __webpack_require__(244);
 	var React = __webpack_require__(147);
 	var Router = __webpack_require__(159);
 	var agent = __webpack_require__(216);
 	var store = __webpack_require__(228);
+
+	var Promise = global.Promise;
 
 	var Tags = function Tags(props) {
 	  var tags = props.tags;
@@ -28008,30 +28064,133 @@
 	  }
 	};
 
-	var Home = function (_React$Component) {
-	  _inherits(Home, _React$Component);
+	var Banner = function (_React$Component) {
+	  _inherits(Banner, _React$Component);
+
+	  function Banner() {
+	    _classCallCheck(this, Banner);
+
+	    return _possibleConstructorReturn(this, Object.getPrototypeOf(Banner).apply(this, arguments));
+	  }
+
+	  _createClass(Banner, [{
+	    key: 'render',
+	    value: function render() {
+	      if (this.props.token) {
+	        return null;
+	      }
+	      return React.createElement(
+	        'div',
+	        { className: 'banner' },
+	        React.createElement(
+	          'div',
+	          { className: 'container' },
+	          React.createElement(
+	            'h1',
+	            { className: 'logo-font' },
+	            this.props.appName.toLowerCase()
+	          ),
+	          React.createElement(
+	            'p',
+	            null,
+	            'A place to share your knowledge.'
+	          )
+	        )
+	      );
+	    }
+	  }]);
+
+	  return Banner;
+	}(React.Component);
+
+	;
+
+	var YourFeedTab = function (_React$Component2) {
+	  _inherits(YourFeedTab, _React$Component2);
+
+	  function YourFeedTab() {
+	    _classCallCheck(this, YourFeedTab);
+
+	    return _possibleConstructorReturn(this, Object.getPrototypeOf(YourFeedTab).apply(this, arguments));
+	  }
+
+	  _createClass(YourFeedTab, [{
+	    key: 'render',
+	    value: function render() {
+	      if (this.props.token) {
+	        return React.createElement(
+	          'li',
+	          { className: 'nav-item' },
+	          React.createElement(
+	            'a',
+	            { href: '', className: this.props.tab === 'feed' ? 'nav-link active' : 'nav-link' },
+	            'Your Feed'
+	          )
+	        );
+	      }
+	      return null;
+	    }
+	  }]);
+
+	  return YourFeedTab;
+	}(React.Component);
+
+	;
+
+	var GlobalFeedTab = function GlobalFeedTab(props) {
+	  return React.createElement(
+	    'li',
+	    { className: 'nav-item' },
+	    React.createElement(
+	      'a',
+	      { href: '', className: props.tab === 'all' ? 'nav-link active' : 'nav-link' },
+	      'Global Feed'
+	    )
+	  );
+	};
+
+	var MainView = function MainView(props) {
+	  return React.createElement(
+	    'div',
+	    { className: 'col-md-9' },
+	    React.createElement(
+	      'div',
+	      { className: 'feed-toggle' },
+	      React.createElement(
+	        'ul',
+	        { className: 'nav nav-pills outline-active' },
+	        React.createElement(YourFeedTab, { token: props.token, tab: props.tab }),
+	        React.createElement(GlobalFeedTab, { tab: props.tab })
+	      )
+	    ),
+	    React.createElement(ArticleList, { articles: props.articles, loading: props.loading })
+	  );
+	};
+
+	var Home = function (_React$Component3) {
+	  _inherits(Home, _React$Component3);
 
 	  function Home() {
 	    _classCallCheck(this, Home);
 
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Home).call(this));
+	    var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Home).call(this));
 
-	    _this.state = store.getState();
-	    return _this;
+	    _this3.state = store.getState();
+	    return _this3;
 	  }
 
 	  _createClass(Home, [{
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
-	      var _this2 = this;
+	      var _this4 = this;
 
 	      this.unsubscribe = store.subscribe(function () {
-	        _this2.setState(store.getState());
+	        _this4.setState(store.getState());
 	      });
 
 	      store.dispatch({
 	        type: 'HOME_PAGE_LOADED',
-	        payload: agent.Tags.getAll()
+	        payload: Promise.all([agent.Tags.getAll(), agent.Articles.feed()])
 	      });
 	    }
 	  }, {
@@ -28046,30 +28205,18 @@
 	      return React.createElement(
 	        'div',
 	        { className: 'home-page' },
-	        React.createElement(
-	          'div',
-	          { className: 'banner' },
-	          React.createElement(
-	            'div',
-	            { className: 'container' },
-	            React.createElement(
-	              'h1',
-	              { className: 'logo-font' },
-	              this.state.appName
-	            ),
-	            React.createElement(
-	              'p',
-	              null,
-	              'A place to share your knowledge.'
-	            )
-	          )
-	        ),
+	        React.createElement(Banner, { token: this.state.token, appName: this.state.appName }),
 	        React.createElement(
 	          'div',
 	          { className: 'container page' },
 	          React.createElement(
 	            'div',
 	            { className: 'row' },
+	            React.createElement(MainView, {
+	              token: this.state.token,
+	              tab: this.state.listConfig,
+	              articles: this.state.articles,
+	              loading: this.state.loading }),
 	            React.createElement(
 	              'div',
 	              { className: 'col-md-3' },
@@ -28094,9 +28241,94 @@
 	}(React.Component);
 
 	module.exports = Home;
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 244 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var ArticlePreview = __webpack_require__(245);
+	var React = __webpack_require__(147);
+
+	var ArticleList = function ArticleList(props) {
+	  if (!props.articles) {
+	    return React.createElement(
+	      'div',
+	      { className: 'article-preview' },
+	      'Loading...'
+	    );
+	  }
+
+	  if (props.articles.length === 0) {
+	    return React.createElement(
+	      'div',
+	      { className: 'article-preview' },
+	      'No articles are here... yet.'
+	    );
+	  }
+
+	  return React.createElement(
+	    'div',
+	    null,
+	    props.articles.map(function (article) {
+	      return React.createElement(ArticlePreview, { article: article });
+	    })
+	  );
+	};
+
+	module.exports = ArticleList;
+
+/***/ },
+/* 245 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(147);
+
+	var ArticlePreview = function ArticlePreview(props) {
+	  return React.createElement(
+	    'div',
+	    { className: 'article-preview' },
+	    React.createElement(
+	      'a',
+	      { className: 'preview-link' },
+	      React.createElement(
+	        'h1',
+	        null,
+	        props.article.title
+	      ),
+	      React.createElement(
+	        'p',
+	        null,
+	        props.article.description
+	      ),
+	      React.createElement(
+	        'span',
+	        null,
+	        'Read more...'
+	      ),
+	      React.createElement(
+	        'ul',
+	        { className: 'tag-list' },
+	        article.tagList.map(function (tag) {
+	          return React.createElement(
+	            'li',
+	            { className: 'tag-default tag-pill tag-outline' },
+	            tag
+	          );
+	        })
+	      )
+	    )
+	  );
+	};
+
+	module.exports = ArticlePreview;
+
+/***/ },
+/* 246 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -28109,7 +28341,7 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var ListErrors = __webpack_require__(245);
+	var ListErrors = __webpack_require__(247);
 	var React = __webpack_require__(147);
 	var Router = __webpack_require__(159);
 	var agent = __webpack_require__(216);
@@ -28238,7 +28470,7 @@
 	module.exports = Login;
 
 /***/ },
-/* 245 */
+/* 247 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -28292,7 +28524,7 @@
 	module.exports = ListErrors;
 
 /***/ },
-/* 246 */
+/* 248 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -28305,7 +28537,7 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var ListErrors = __webpack_require__(245);
+	var ListErrors = __webpack_require__(247);
 	var React = __webpack_require__(147);
 	var Router = __webpack_require__(159);
 	var agent = __webpack_require__(216);

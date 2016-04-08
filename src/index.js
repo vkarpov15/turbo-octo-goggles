@@ -18,6 +18,16 @@ class App extends React.Component {
     this.state = store.getState();
   }
 
+  componentWillMount() {
+    store.dispatch({
+      type: 'APP_LOAD',
+      token: window.localStorage.getItem('jwt')
+    });
+    if (window.localStorage.getItem('jwt')) {
+      agent.setToken(window.localStorage.getItem('jwt'));
+    }
+  }
+
   componentDidMount() {
     store.subscribe(() => {
       this.setState(store.getState());
