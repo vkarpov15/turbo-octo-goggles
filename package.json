@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "description": "Placeholder",
   "dependencies": {
-    "react": "0.14.8",
-    "react-dom": "0.14.8",
+    "react": "15.0.0",
+    "react-dom": "15.0.0",
     "react-router": "2.0.1",
     "redux": "3.3.1",
     "superagent": "1.8.2",
@@ -21,6 +21,7 @@
     "node": ">= 4.0.0"
   },
   "scripts": {
-    "compile": "webpack"
+    "compile": "webpack",
+    "watch": "webpack --watch"
   }
 }

@@ -7,6 +7,9 @@ module.exports = (state = defaultState, action) => {
   switch (action.type) {
     case 'APP_LOAD':
       state.token = action.token || null;
+      if (action.payload) {
+        state.currentUser = action.payload.user;
+      }
       break;
     case 'REDIRECT':
       state.redirectTo = null;
@@ -35,6 +38,7 @@ module.exports = (state = defaultState, action) => {
       } else {
         state.redirectTo = '/';
         state.token = action.payload.user.token;
+        state.currentUser = action.payload.user;
       }
       break;
     case 'LOGIN_PAGE_UNLOADED':

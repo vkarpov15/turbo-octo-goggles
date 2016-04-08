@@ -4,6 +4,72 @@ const React = require('react');
 const Router = require('react-router');
 const store = require('../store');
 
+const LoggedOutView = props => {
+  if (!props.state.currentUser) {
+    return (
+      <ul className="nav navbar-nav pull-xs-right">
+
+        <li className="nav-item">
+          <a className="nav-link">
+            Home
+          </a>
+        </li>
+
+        <li className="nav-item">
+          <Router.Link to="login" className="nav-link">
+            Sign in
+          </Router.Link>
+        </li>
+
+        <li className="nav-item">
+          <Router.Link to="register" className="nav-link">
+            Sign up
+          </Router.Link>
+        </li>
+
+      </ul>
+    );
+  }
+  return null;
+};
+
+const LoggedInView = props => {
+  if (props.state.currentUser) {
+    return (
+      <ul className="nav navbar-nav pull-xs-right">
+
+        <li className="nav-item">
+          <Router.Link to="home" className="nav-link">
+            Home
+          </Router.Link>
+        </li>
+
+        <li className="nav-item">
+          <Router.Link to="editor" className="nav-link">
+            <i className="ion-compose"></i>&nbsp;New Post
+          </Router.Link>
+        </li>
+
+        <li className="nav-item">
+          <Router.Link to="settings" className="nav-link">
+            <i className="ion-gear-a"></i>&nbsp;Settings
+          </Router.Link>
+        </li>
+
+        <li className="nav-item">
+          <Router.Link to="profile" className="nav-link">
+            <img src={props.state.currentUser.image} className="user-pic" />
+            {props.state.currentUser.username}
+          </Router.Link>
+        </li>
+
+      </ul>
+    );
+  }
+
+  return null;
+};
+
 class Header extends React.Component {
   render() {
     return (
@@ -14,28 +80,10 @@ class Header extends React.Component {
             {this.props.state.appName.toLowerCase()}
           </a>
 
-          <ul className="nav navbar-nav pull-xs-right">
 
-            <li className="nav-item">
-              <a className="nav-link">
-                Home
-              </a>
-            </li>
+          <LoggedOutView state={this.props.state} />
 
-            <li className="nav-item">
-              <Router.Link to="login" className="nav-link">
-                Sign in
-              </Router.Link>
-            </li>
-
-            <li className="nav-item">
-              <Router.Link to="register" className="nav-link">
-                Sign up
-              </Router.Link>
-            </li>
-
-          </ul>
-
+          <LoggedInView state={this.props.state} />
         </div>
       </nav>
     );

@@ -19,13 +19,16 @@ class App extends React.Component {
   }
 
   componentWillMount() {
+    const token = window.localStorage.getItem('jwt');
+    if (token) {
+      agent.setToken(token);
+    }
+
     store.dispatch({
       type: 'APP_LOAD',
-      token: window.localStorage.getItem('jwt')
+      token: token,
+      payload: token ? agent.Auth.current() : null
     });
-    if (window.localStorage.getItem('jwt')) {
-      agent.setToken(window.localStorage.getItem('jwt'));
-    }
   }
 
   componentDidMount() {
