@@ -109,11 +109,18 @@
 	  }, {
 	    key: 'render',
 	    value: function render() {
+	      if (this.state.appLoaded) {
+	        return React.createElement(
+	          'div',
+	          null,
+	          React.createElement(Header, { state: this.state }),
+	          this.props.children
+	        );
+	      }
 	      return React.createElement(
 	        'div',
 	        null,
-	        React.createElement(Header, { state: this.state }),
-	        this.props.children
+	        React.createElement(Header, { state: this.state })
 	      );
 	    }
 	  }]);
@@ -28208,6 +28215,7 @@
 	      if (action.payload) {
 	        state.currentUser = action.payload.user;
 	      }
+	      state.appLoaded = true;
 	      break;
 	    case 'REDIRECT':
 	      state.redirectTo = null;

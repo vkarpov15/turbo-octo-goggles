@@ -43,10 +43,17 @@ class App extends React.Component {
   }
 
   render() {
+    if (this.state.appLoaded) {
+      return (
+        <div>
+          <Header state={this.state} />
+          {this.props.children}
+        </div>
+      );
+    }
     return (
       <div>
         <Header state={this.state} />
-        {this.props.children}
       </div>
     );
   }

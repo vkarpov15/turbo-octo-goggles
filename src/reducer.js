@@ -10,6 +10,7 @@ module.exports = (state = defaultState, action) => {
       if (action.payload) {
         state.currentUser = action.payload.user;
       }
+      state.appLoaded = true;
       break;
     case 'REDIRECT':
       state.redirectTo = null;
