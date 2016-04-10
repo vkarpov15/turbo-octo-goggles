@@ -28679,21 +28679,57 @@
 	var React = __webpack_require__(160);
 
 	var ArticlePreview = function ArticlePreview(props) {
+	  var article = props.article;
 	  return React.createElement(
 	    'div',
 	    { className: 'article-preview' },
+	    React.createElement(
+	      'div',
+	      { className: 'article-meta' },
+	      React.createElement(
+	        'a',
+	        { href: '' },
+	        React.createElement('img', { src: article.author.image })
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'info' },
+	        React.createElement(
+	          'a',
+	          { className: 'author',
+	            href: '' },
+	          article.author.username
+	        ),
+	        React.createElement(
+	          'span',
+	          { className: 'date' },
+	          new Date(article.createdAt).toDateString()
+	        )
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'pull-xs-right' },
+	        React.createElement(
+	          'button',
+	          { className: 'btn btn-sm' },
+	          React.createElement('i', { className: 'ion-heart' }),
+	          ' ',
+	          article.favoritesCount
+	        )
+	      )
+	    ),
 	    React.createElement(
 	      'a',
 	      { className: 'preview-link' },
 	      React.createElement(
 	        'h1',
 	        null,
-	        props.article.title
+	        article.title
 	      ),
 	      React.createElement(
 	        'p',
 	        null,
-	        props.article.description
+	        article.description
 	      ),
 	      React.createElement(
 	        'span',
@@ -28703,7 +28739,7 @@
 	      React.createElement(
 	        'ul',
 	        { className: 'tag-list' },
-	        props.article.tagList.map(function (tag) {
+	        article.tagList.map(function (tag) {
 	          return React.createElement(
 	            'li',
 	            { className: 'tag-default tag-pill tag-outline', key: tag },
