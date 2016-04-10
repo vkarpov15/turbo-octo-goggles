@@ -49,25 +49,36 @@ class Banner extends React.Component {
   }
 };
 
-class YourFeedTab extends React.Component {
-  render() {
-    if (this.props.token) {
-      return (
-        <li className="nav-item">
-          <a href="" className={ this.props.tab === 'feed' ? 'nav-link active' : 'nav-link' }>
-            Your Feed
-          </a>
-        </li>
-      );
+const YourFeedTab = props => {
+  if (props.token) {
+    const clickHandler = ev => {
+      ev.preventDefault();
+      store.dispatch({ type: 'UPDATE_FIELD', key: 'tab', value: 'feed' });
     }
-    return null;
+
+    return (
+      <li className="nav-item">
+        <a  href=""
+            className={ props.tab === 'feed' ? 'nav-link active' : 'nav-link' }
+            onClick={clickHandler}>
+          Your Feed
+        </a>
+      </li>
+    );
   }
+  return null;
 };
 
 const GlobalFeedTab = props => {
+  const clickHandler = ev => {
+    ev.preventDefault();
+    store.dispatch({ type: 'UPDATE_FIELD', key: 'tab', value: 'all' });
+  };
   return (
     <li className="nav-item">
-      <a href="" className={ props.tab === 'all' ? 'nav-link active' : 'nav-link' }>
+      <a  href=""
+          className={ props.tab === 'all' ? 'nav-link active' : 'nav-link' }
+          onClick={clickHandler}>
         Global Feed
       </a>
     </li>
@@ -123,7 +134,7 @@ class Home extends React.Component {
           <div className="row">
             <MainView
               token={this.state.token}
-              tab={this.state.listConfig}
+              tab={this.state.tab}
               articles={this.state.articles}
               loading={this.state.loading} />
 

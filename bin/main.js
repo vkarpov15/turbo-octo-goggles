@@ -28216,15 +28216,15 @@
 	      state.tags = action.payload[0].tags;
 	      state.articles = action.payload[1].articles;
 	      if (state.token) {
-	        state.listConfig = 'feed';
+	        state.tab = 'feed';
 	      } else {
-	        state.listConfig = 'all';
+	        state.tab = 'all';
 	      }
 	      break;
 	    case 'HOME_PAGE_UNLOADED':
 	      delete state.articles;
 	      delete state.tags;
-	      delete state.listConfig;
+	      delete state.tab;
 	      break;
 	    case 'LOGIN':
 	    case 'REGISTER':
@@ -28476,45 +28476,41 @@
 
 	;
 
-	var YourFeedTab = function (_React$Component2) {
-	  _inherits(YourFeedTab, _React$Component2);
+	var YourFeedTab = function YourFeedTab(props) {
+	  if (props.token) {
+	    var clickHandler = function clickHandler(ev) {
+	      ev.preventDefault();
+	      store.dispatch({ type: 'UPDATE_FIELD', key: 'tab', value: 'feed' });
+	    };
 
-	  function YourFeedTab() {
-	    _classCallCheck(this, YourFeedTab);
-
-	    return _possibleConstructorReturn(this, Object.getPrototypeOf(YourFeedTab).apply(this, arguments));
+	    return React.createElement(
+	      'li',
+	      { className: 'nav-item' },
+	      React.createElement(
+	        'a',
+	        { href: '',
+	          className: props.tab === 'feed' ? 'nav-link active' : 'nav-link',
+	          onClick: clickHandler },
+	        'Your Feed'
+	      )
+	    );
 	  }
-
-	  _createClass(YourFeedTab, [{
-	    key: 'render',
-	    value: function render() {
-	      if (this.props.token) {
-	        return React.createElement(
-	          'li',
-	          { className: 'nav-item' },
-	          React.createElement(
-	            'a',
-	            { href: '', className: this.props.tab === 'feed' ? 'nav-link active' : 'nav-link' },
-	            'Your Feed'
-	          )
-	        );
-	      }
-	      return null;
-	    }
-	  }]);
-
-	  return YourFeedTab;
-	}(React.Component);
-
-	;
+	  return null;
+	};
 
 	var GlobalFeedTab = function GlobalFeedTab(props) {
+	  var clickHandler = function clickHandler(ev) {
+	    ev.preventDefault();
+	    store.dispatch({ type: 'UPDATE_FIELD', key: 'tab', value: 'all' });
+	  };
 	  return React.createElement(
 	    'li',
 	    { className: 'nav-item' },
 	    React.createElement(
 	      'a',
-	      { href: '', className: props.tab === 'all' ? 'nav-link active' : 'nav-link' },
+	      { href: '',
+	        className: props.tab === 'all' ? 'nav-link active' : 'nav-link',
+	        onClick: clickHandler },
 	      'Global Feed'
 	    )
 	  );
@@ -28538,25 +28534,25 @@
 	  );
 	};
 
-	var Home = function (_React$Component3) {
-	  _inherits(Home, _React$Component3);
+	var Home = function (_React$Component2) {
+	  _inherits(Home, _React$Component2);
 
 	  function Home() {
 	    _classCallCheck(this, Home);
 
-	    var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Home).call(this));
+	    var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Home).call(this));
 
-	    _this3.state = store.getState();
-	    return _this3;
+	    _this2.state = store.getState();
+	    return _this2;
 	  }
 
 	  _createClass(Home, [{
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
-	      var _this4 = this;
+	      var _this3 = this;
 
 	      this.unsubscribe = store.subscribe(function () {
-	        _this4.setState(store.getState());
+	        _this3.setState(store.getState());
 	      });
 
 	      store.dispatch({
@@ -28585,7 +28581,7 @@
 	            { className: 'row' },
 	            React.createElement(MainView, {
 	              token: this.state.token,
-	              tab: this.state.listConfig,
+	              tab: this.state.tab,
 	              articles: this.state.articles,
 	              loading: this.state.loading }),
 	            React.createElement(

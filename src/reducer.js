@@ -21,15 +21,15 @@ module.exports = (state = defaultState, action) => {
       state.tags = action.payload[0].tags;
       state.articles = action.payload[1].articles;
       if (state.token) {
-        state.listConfig = 'feed';
+        state.tab = 'feed';
       } else {
-        state.listConfig = 'all';
+        state.tab = 'all';
       }
       break;
     case 'HOME_PAGE_UNLOADED':
       delete state.articles;
       delete state.tags;
-      delete state.listConfig;
+      delete state.tab;
       break;
     case 'LOGIN':
     case 'REGISTER':
