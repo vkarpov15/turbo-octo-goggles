@@ -61,6 +61,7 @@
 	var history = __webpack_require__(231);
 	var store = __webpack_require__(235);
 
+	var Editor = __webpack_require__(256);
 	var Header = __webpack_require__(249);
 	var Home = __webpack_require__(250);
 	var Login = __webpack_require__(253);
@@ -140,7 +141,8 @@
 	    { path: '/', component: App },
 	    React.createElement(Router.IndexRoute, { component: Home }),
 	    React.createElement(Router.Route, { path: 'login', component: Login }),
-	    React.createElement(Router.Route, { path: 'register', component: Register })
+	    React.createElement(Router.Route, { path: 'register', component: Register }),
+	    React.createElement(Router.Route, { path: 'editor', component: Editor })
 	  )
 	), document.getElementById('main'));
 
@@ -29106,6 +29108,145 @@
 	}(React.Component);
 
 	module.exports = Register;
+
+/***/ },
+/* 256 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var ListErrors = __webpack_require__(254);
+	var React = __webpack_require__(160);
+	var store = __webpack_require__(235);
+
+	var Editor = function (_React$Component) {
+	  _inherits(Editor, _React$Component);
+
+	  function Editor() {
+	    _classCallCheck(this, Editor);
+
+	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Editor).call(this));
+
+	    _this.state = store.getState();
+	    return _this;
+	  }
+
+	  _createClass(Editor, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      var _this2 = this;
+
+	      this.unsubscribe = store.subscribe(function () {
+	        _this2.setState(store.getState());
+	      });
+	    }
+	  }, {
+	    key: 'componentWillUnmount',
+	    value: function componentWillUnmount() {
+	      this.unsubscribe && this.unsubscribe();
+	      store.dispatch({ type: 'EDITOR_PAGE_UNLOADED' });
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var _this3 = this;
+
+	      return React.createElement(
+	        'div',
+	        { className: 'editor-page' },
+	        React.createElement(
+	          'div',
+	          { className: 'container page' },
+	          React.createElement(
+	            'div',
+	            { className: 'row' },
+	            React.createElement(
+	              'div',
+	              { className: 'col-md-10 offset-md-1 col-xs-12' },
+	              React.createElement(ListErrors, { errors: this.state.errors }),
+	              React.createElement(
+	                'form',
+	                null,
+	                React.createElement(
+	                  'fieldset',
+	                  null,
+	                  React.createElement(
+	                    'fieldset',
+	                    { className: 'form-group' },
+	                    React.createElement('input', { className: 'form-control form-control-lg',
+	                      'ng-model': '$ctrl.article.title',
+	                      type: 'text',
+	                      placeholder: 'Article Title',
+	                      value: this.state.articleTitle,
+	                      onChange: this.changeTitle })
+	                  ),
+	                  React.createElement(
+	                    'fieldset',
+	                    { className: 'form-group' },
+	                    React.createElement('input', { className: 'form-control',
+	                      type: 'text',
+	                      placeholder: 'What\'s this article about?',
+	                      value: this.state.articleDescription,
+	                      onChange: this.changeDescription })
+	                  ),
+	                  React.createElement(
+	                    'fieldset',
+	                    { className: 'form-group' },
+	                    React.createElement('textarea', { className: 'form-control',
+	                      rows: '8',
+	                      placeholder: 'Write your article (in markdown)',
+	                      value: this.state.articleText,
+	                      onChange: this.changeText })
+	                  ),
+	                  React.createElement(
+	                    'fieldset',
+	                    { className: 'form-group' },
+	                    React.createElement('input', { className: 'form-control',
+	                      type: 'text',
+	                      placeholder: 'Enter tags',
+	                      value: this.state.tagInput,
+	                      onKeyUp: this.handleTagInput }),
+	                    React.createElement(
+	                      'div',
+	                      { className: 'tag-list' },
+	                      (this.state.articleTagList || []).map(function (tag) {
+	                        return React.createElement(
+	                          'span',
+	                          { className: 'tag-default tag-pill', key: tag },
+	                          React.createElement('i', { className: 'ion-close-round',
+	                            onClick: _this3.removeTagHandler(tag) }),
+	                          tag
+	                        );
+	                      })
+	                    )
+	                  ),
+	                  React.createElement(
+	                    'button',
+	                    { className: 'btn btn-lg pull-xs-right btn-primary',
+	                      type: 'button' },
+	                    'Publish Article'
+	                  )
+	                )
+	              )
+	            )
+	          )
+	        )
+	      );
+	    }
+	  }]);
+
+	  return Editor;
+	}(React.Component);
+
+	module.exports = Editor;
 
 /***/ }
 /******/ ]);
