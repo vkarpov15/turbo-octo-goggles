@@ -23,7 +23,7 @@ const ArticleList = props => {
       {
         props.articles.map(article => {
           return (
-            <ArticlePreview article={article} />
+            <ArticlePreview article={article} key={article.slug} />
           );
         })
       }

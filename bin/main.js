@@ -25446,6 +25446,9 @@
 	};
 
 	var Articles = {
+	  all: function all() {
+	    return requests.get('/articles?limit=10&offset=0');
+	  },
 	  feed: function feed() {
 	    return requests.get('/articles/feed?limit=10&offset=0');
 	  }
@@ -28215,16 +28218,16 @@
 	    case 'HOME_PAGE_LOADED':
 	      state.tags = action.payload[0].tags;
 	      state.articles = action.payload[1].articles;
-	      if (state.token) {
-	        state.tab = 'feed';
-	      } else {
-	        state.tab = 'all';
-	      }
+	      state.tab = action.tab;
 	      break;
 	    case 'HOME_PAGE_UNLOADED':
 	      delete state.articles;
 	      delete state.tags;
 	      delete state.tab;
+	      break;
+	    case 'CHANGE_TAB':
+	      state.articles = action.payload.articles;
+	      state.tab = action.tab;
 	      break;
 	    case 'LOGIN':
 	    case 'REGISTER':
@@ -28480,7 +28483,11 @@
 	  if (props.token) {
 	    var clickHandler = function clickHandler(ev) {
 	      ev.preventDefault();
-	      store.dispatch({ type: 'UPDATE_FIELD', key: 'tab', value: 'feed' });
+	      store.dispatch({
+	        type: 'CHANGE_TAB',
+	        tab: 'feed',
+	        payload: agent.Articles.feed()
+	      });
 	    };
 
 	    return React.createElement(
@@ -28501,7 +28508,11 @@
 	var GlobalFeedTab = function GlobalFeedTab(props) {
 	  var clickHandler = function clickHandler(ev) {
 	    ev.preventDefault();
-	    store.dispatch({ type: 'UPDATE_FIELD', key: 'tab', value: 'all' });
+	    store.dispatch({
+	      type: 'CHANGE_TAB',
+	      tab: 'all',
+	      payload: agent.Articles.all()
+	    });
 	  };
 	  return React.createElement(
 	    'li',
@@ -28555,9 +28566,13 @@
 	        _this3.setState(store.getState());
 	      });
 
+	      var tab = this.state.token ? 'feed' : 'all';
+	      var articlesPromise = this.state.token ? agent.Articles.feed() : agent.Articles.all();
+
 	      store.dispatch({
 	        type: 'HOME_PAGE_LOADED',
-	        payload: Promise.all([agent.Tags.getAll(), agent.Articles.feed()])
+	        tab: tab,
+	        payload: Promise.all([agent.Tags.getAll(), articlesPromise])
 	      });
 	    }
 	  }, {
@@ -28640,7 +28655,7 @@
 	    'div',
 	    null,
 	    props.articles.map(function (article) {
-	      return React.createElement(ArticlePreview, { article: article });
+	      return React.createElement(ArticlePreview, { article: article, key: article.slug });
 	    })
 	  );
 	};
@@ -28680,10 +28695,10 @@
 	      React.createElement(
 	        'ul',
 	        { className: 'tag-list' },
-	        article.tagList.map(function (tag) {
+	        props.article.tagList.map(function (tag) {
 	          return React.createElement(
 	            'li',
-	            { className: 'tag-default tag-pill tag-outline' },
+	            { className: 'tag-default tag-pill tag-outline', key: tag },
 	            tag
 	          );
 	        })

@@ -37,6 +37,7 @@ const Tags = {
 };
 
 const Articles = {
+  all: () => requests.get('/articles?limit=10&offset=0'),
   feed: () => requests.get('/articles/feed?limit=10&offset=0')
 };
 

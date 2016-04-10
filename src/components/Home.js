@@ -53,7 +53,11 @@ const YourFeedTab = props => {
   if (props.token) {
     const clickHandler = ev => {
       ev.preventDefault();
-      store.dispatch({ type: 'UPDATE_FIELD', key: 'tab', value: 'feed' });
+      store.dispatch({
+        type: 'CHANGE_TAB',
+        tab: 'feed',
+        payload: agent.Articles.feed()
+      });
     }
 
     return (
@@ -72,7 +76,11 @@ const YourFeedTab = props => {
 const GlobalFeedTab = props => {
   const clickHandler = ev => {
     ev.preventDefault();
-    store.dispatch({ type: 'UPDATE_FIELD', key: 'tab', value: 'all' });
+    store.dispatch({
+      type: 'CHANGE_TAB',
+      tab: 'all',
+      payload: agent.Articles.all()
+    });
   };
   return (
     <li className="nav-item">
@@ -113,9 +121,15 @@ class Home extends React.Component {
     this.unsubscribe =
       store.subscribe(() => { this.setState(store.getState()) });
 
+    const tab = this.state.token ? 'feed' : 'all';
+    const articlesPromise = this.state.token ?
+      agent.Articles.feed() :
+      agent.Articles.all();
+
     store.dispatch({
       type: 'HOME_PAGE_LOADED',
-      payload: Promise.all([agent.Tags.getAll(), agent.Articles.feed()])
+      tab,
+      payload: Promise.all([agent.Tags.getAll(), articlesPromise])
     });
   }
 

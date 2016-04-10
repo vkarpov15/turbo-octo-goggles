@@ -11,9 +11,9 @@ const ArticlePreview = props => {
         <span>Read more...</span>
         <ul className="tag-list">
           {
-            article.tagList.map(tag => {
+            props.article.tagList.map(tag => {
               return (
-                <li className="tag-default tag-pill tag-outline">
+                <li className="tag-default tag-pill tag-outline" key={tag}>
                   {tag}
                 </li>
               )
