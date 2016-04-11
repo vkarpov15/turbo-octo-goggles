@@ -28,6 +28,23 @@ module.exports = (state = defaultState, action) => {
       delete state.tags;
       delete state.tab;
       break;
+    case 'ADD_TAG':
+      state.articleTagList.push(state.tagInput);
+      state.tagInput = '';
+      break;
+    case 'REMOVE_TAG':
+      const index = state.articleTagList.indexOf(action.tag);
+      if (index !== -1) {
+        array.splice(state.articleTagList, index);
+      }
+      break;
+    case 'EDITOR_PAGE_LOADED':
+      state.articleTagList = [];
+      state.tagInput = '';
+      break;
+    case 'EDITOR_PAGE_UNLOADED':
+      delete state.articleTagList;
+      break;
     case 'CHANGE_TAB':
       state.articles = action.payload.articles;
       state.tab = action.tab;
