@@ -26,7 +26,7 @@ class Login extends React.Component {
         type: 'LOGIN',
         payload: agent.Auth.login(this.state.email, this.state.password)
       });
-    }
+    };
   }
 
   componentDidMount() {

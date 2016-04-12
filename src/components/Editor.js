@@ -2,6 +2,7 @@
 
 const ListErrors = require('./ListErrors');
 const React = require('react');
+const agent = require('../agent');
 const store = require('../store');
 
 class Editor extends React.Component {
@@ -9,23 +10,15 @@ class Editor extends React.Component {
     super();
     this.state = store.getState();
 
-    const updateFieldEvent = (key, value) => ({
+    const updateFieldEvent = key => ev => store.dispatch({
       type: 'UPDATE_FIELD',
       key,
-      value
+      value: ev.target.value
     });
-    this.changeTitle = ev => {
-      store.dispatch(updateFieldEvent('title', ev.target.value));
-    };
-    this.changeDescription = ev => {
-      store.dispatch(updateFieldEvent('description', ev.target.value));
-    };
-    this.changeText = ev => {
-      store.dispatch(updateFieldEvent('text', ev.target.value));
-    };
-    this.changeTagInput = ev => {
-      store.dispatch(updateFieldEvent('tagInput', ev.target.value));
-    };
+    this.changeTitle = updateFieldEvent('title');
+    this.changeDescription = updateFieldEvent('description');
+    this.changeBody = updateFieldEvent('body');
+    this.changeTagInput = updateFieldEvent('tagInput');
 
     this.watchForEnter = ev => {
       if (ev.keyCode === 13) {
@@ -36,6 +29,20 @@ class Editor extends React.Component {
 
     this.removeTagHandler = tag => () => {
       store.dispatch({ type: 'REMOVE_TAG', tag });
+    };
+
+    this.submitForm = ev => {
+      ev.preventDefault();
+      const article = {
+        title: this.state.title,
+        description: this.state.description,
+        body: this.state.body,
+        tagList: this.state.tagList
+      };
+      store.dispatch({
+        type: 'ARTICLE_SUBMITTED',
+        payload: agent.Articles.create(article)
+      });
     };
   }
 
@@ -68,10 +75,9 @@ class Editor extends React.Component {
 
                   <fieldset className="form-group">
                     <input className="form-control form-control-lg"
-                      ng-model="$ctrl.article.title"
                       type="text"
                       placeholder="Article Title"
-                      value={this.state.articleTitle}
+                      value={this.state.title}
                       onChange={this.changeTitle} />
                   </fieldset>
 
@@ -79,7 +85,7 @@ class Editor extends React.Component {
                     <input className="form-control"
                       type="text"
                       placeholder="What's this article about?"
-                      value={this.state.articleDescription}
+                      value={this.state.description}
                       onChange={this.changeDescription} />
                   </fieldset>
 
@@ -87,8 +93,8 @@ class Editor extends React.Component {
                     <textarea className="form-control"
                       rows="8"
                       placeholder="Write your article (in markdown)"
-                      value={this.state.articleText}
-                      onChange={this.changeText}>
+                      value={this.state.body}
+                      onChange={this.changeBody}>
                     </textarea>
                   </fieldset>
 
@@ -102,7 +108,7 @@ class Editor extends React.Component {
 
                     <div className="tag-list">
                       {
-                        (this.state.articleTagList || []).map(tag => {
+                        (this.state.tagList || []).map(tag => {
                           return (
                             <span className="tag-default tag-pill" key={tag}>
                               <i  className="ion-close-round"
@@ -117,7 +123,8 @@ class Editor extends React.Component {
                   </fieldset>
 
                   <button className="btn btn-lg pull-xs-right btn-primary"
-                          type="button">
+                          type="button"
+                          onClick={this.submitForm}>
                     Publish Article
                   </button>
 

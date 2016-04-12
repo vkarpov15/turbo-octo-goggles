@@ -29,21 +29,36 @@ module.exports = (state = defaultState, action) => {
       delete state.tab;
       break;
     case 'ADD_TAG':
-      state.articleTagList.push(state.tagInput);
+      state.tagList.push(state.tagInput);
       state.tagInput = '';
       break;
     case 'REMOVE_TAG':
-      const index = state.articleTagList.indexOf(action.tag);
+      const index = state.tagList.indexOf(action.tag);
       if (index !== -1) {
-        array.splice(state.articleTagList, index);
+        array.splice(state.tagList, index);
       }
       break;
     case 'EDITOR_PAGE_LOADED':
-      state.articleTagList = [];
+      state.title = '';
+      state.description = '';
+      state.body = '';
       state.tagInput = '';
+      state.tagList = [];
       break;
     case 'EDITOR_PAGE_UNLOADED':
-      delete state.articleTagList;
+      delete state.title;
+      delete state.description;
+      delete state.body;
+      delete state.tagInput;
+      delete state.tagList;
+      delete state.errors;
+      break;
+    case 'ARTICLE_SUBMITTED':
+      if (action.error) {
+        state.errors = action.payload.errors;
+      } else {
+        console.log('should redirect to', action.payload.article.slug);
+      }
       break;
     case 'CHANGE_TAB':
       state.articles = action.payload.articles;

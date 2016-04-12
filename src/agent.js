@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash');
 const superagent =
   require('superagent-promise')(require('superagent'), global.Promise);
 
@@ -37,8 +38,14 @@ const Tags = {
 };
 
 const Articles = {
-  all: () => requests.get('/articles?limit=10&offset=0'),
-  feed: () => requests.get('/articles/feed?limit=10&offset=0')
+  all: () =>
+    requests.get('/articles?limit=10&offset=0'),
+  feed: () =>
+    requests.get('/articles/feed?limit=10&offset=0'),
+  update: article =>
+    requests.put(`/articles/${article.slug}`, _.omit(article, ['slug'])),
+  create: article =>
+    requests.post('/articles', article)
 };
 
 module.exports = {
