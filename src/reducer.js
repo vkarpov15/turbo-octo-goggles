@@ -18,6 +18,14 @@ module.exports = (state = defaultState, action) => {
     case 'UPDATE_FIELD':
       state[action.key] = action.value;
       break;
+    case 'ARTICLE_PAGE_LOADED':
+      state.article = action.payload[0].article;
+      state.comments = action.payload[1].comments;
+      break;
+    case 'ARTICLE_PAGE_LOADED':
+      delete state.article;
+      delete state.comments;
+      break;
     case 'HOME_PAGE_LOADED':
       state.tags = action.payload[0].tags;
       state.articles = action.payload[1].articles;
@@ -57,7 +65,7 @@ module.exports = (state = defaultState, action) => {
       if (action.error) {
         state.errors = action.payload.errors;
       } else {
-        console.log('should redirect to', action.payload.article.slug);
+        state.redirectTo = `article/${action.article.payload.slug}`;
       }
       break;
     case 'CHANGE_TAB':

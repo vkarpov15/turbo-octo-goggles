@@ -1,6 +1,7 @@
 'use strict';
 
 const React = require('react');
+const Router = require('react-router');
 
 const ArticlePreview = props => {
   const article = props.article;
@@ -28,7 +29,7 @@ const ArticlePreview = props => {
         </div>
       </div>
 
-      <a className="preview-link">
+      <Router.Link to={`article/${article.slug}`} className="preview-link">
         <h1>{article.title}</h1>
         <p>{article.description}</p>
         <span>Read more...</span>
@@ -43,7 +44,7 @@ const ArticlePreview = props => {
             })
           }
         </ul>
-      </a>
+      </Router.Link>
     </div>
   );
 }

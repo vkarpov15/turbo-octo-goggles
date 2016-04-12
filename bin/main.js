@@ -61,6 +61,7 @@
 	var history = __webpack_require__(234);
 	var store = __webpack_require__(238);
 
+	var Article = __webpack_require__(260);
 	var Editor = __webpack_require__(252);
 	var Header = __webpack_require__(254);
 	var Home = __webpack_require__(255);
@@ -142,7 +143,8 @@
 	    React.createElement(Router.IndexRoute, { component: Home }),
 	    React.createElement(Router.Route, { path: 'login', component: Login }),
 	    React.createElement(Router.Route, { path: 'register', component: Register }),
-	    React.createElement(Router.Route, { path: 'editor', component: Editor })
+	    React.createElement(Router.Route, { path: 'editor', component: Editor }),
+	    React.createElement(Router.Route, { path: 'article/:id', component: Article })
 	  )
 	), document.getElementById('main'));
 
@@ -25462,6 +25464,9 @@
 	  feed: function feed() {
 	    return requests.get('/articles/feed?limit=10&offset=0');
 	  },
+	  get: function get(slug) {
+	    return requests.get('/articles/' + slug);
+	  },
 	  update: function update(article) {
 	    return requests.put('/articles/' + article.slug, _.omit(article, ['slug']));
 	  },
@@ -25470,9 +25475,16 @@
 	  }
 	};
 
+	var Comments = {
+	  forArticle: function forArticle(slug) {
+	    return requests.get('/articles/' + slug + '/comments');
+	  }
+	};
+
 	module.exports = {
 	  Articles: Articles,
 	  Auth: Auth,
+	  Comments: Comments,
 	  Tags: Tags,
 	  setToken: function setToken(_token) {
 	    token = _token;
@@ -37164,6 +37176,14 @@
 	    case 'UPDATE_FIELD':
 	      state[action.key] = action.value;
 	      break;
+	    case 'ARTICLE_PAGE_LOADED':
+	      state.article = action.payload[0].article;
+	      state.comments = action.payload[1].comments;
+	      break;
+	    case 'ARTICLE_PAGE_LOADED':
+	      delete state.article;
+	      delete state.comments;
+	      break;
 	    case 'HOME_PAGE_LOADED':
 	      state.tags = action.payload[0].tags;
 	      state.articles = action.payload[1].articles;
@@ -37203,7 +37223,7 @@
 	      if (action.error) {
 	        state.errors = action.payload.errors;
 	      } else {
-	        console.log('should redirect to', action.payload.article.slug);
+	        state.redirectTo = 'article/' + action.article.payload.slug;
 	      }
 	      break;
 	    case 'CHANGE_TAB':
@@ -37891,6 +37911,7 @@
 	'use strict';
 
 	var React = __webpack_require__(160);
+	var Router = __webpack_require__(166);
 
 	var ArticlePreview = function ArticlePreview(props) {
 	  var article = props.article;
@@ -37933,8 +37954,8 @@
 	      )
 	    ),
 	    React.createElement(
-	      'a',
-	      { className: 'preview-link' },
+	      Router.Link,
+	      { to: 'article/' + article.slug, className: 'preview-link' },
 	      React.createElement(
 	        'h1',
 	        null,
@@ -38266,6 +38287,239 @@
 	}(React.Component);
 
 	module.exports = Register;
+
+/***/ },
+/* 260 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var React = __webpack_require__(160);
+	var Router = __webpack_require__(166);
+	var agent = __webpack_require__(223);
+	var store = __webpack_require__(238);
+
+	var Comment = function Comment(props) {
+	  var comment = props.comment;
+	  return React.createElement(
+	    'div',
+	    { className: 'card' },
+	    React.createElement(
+	      'div',
+	      { className: 'card-block' },
+	      React.createElement(
+	        'p',
+	        { className: 'card-text' },
+	        comment.body
+	      )
+	    ),
+	    React.createElement(
+	      'div',
+	      { className: 'card-footer' },
+	      React.createElement(
+	        'a',
+	        { className: 'comment-author' },
+	        React.createElement('img', { src: comment.author.image, className: 'comment-author-img' })
+	      ),
+	      ' ',
+	      React.createElement(
+	        'a',
+	        { className: 'comment-author' },
+	        comment.author.username
+	      ),
+	      React.createElement(
+	        'span',
+	        { className: 'date-posted' },
+	        new Date(comment.createdAt).toDateString()
+	      ),
+	      React.createElement(
+	        'span',
+	        { className: 'mod-options' },
+	        React.createElement('i', { className: 'ion-trash-a' })
+	      )
+	    )
+	  );
+	};
+
+	var CommentList = function CommentList(props) {
+	  return React.createElement(
+	    'div',
+	    null,
+	    props.comments.map(function (comment) {
+	      return React.createElement(Comment, { comment: comment });
+	    })
+	  );
+	};
+
+	var CommentContainer = function CommentContainer(props) {
+	  if (props.currentUser) {
+	    return React.createElement(
+	      'div',
+	      { className: 'col-xs-12 col-md-8 offset-md-2' },
+	      React.createElement(
+	        'div',
+	        null,
+	        React.createElement('list-errors', { errors: props.errors }),
+	        React.createElement(
+	          'form',
+	          { className: 'card comment-form' },
+	          React.createElement(
+	            'div',
+	            { className: 'card-block' },
+	            React.createElement('textarea', { className: 'form-control',
+	              placeholder: 'Write a comment...',
+	              rows: '3' })
+	          ),
+	          React.createElement(
+	            'div',
+	            { className: 'card-footer' },
+	            React.createElement('img', { src: props.currentUser.image, className: 'comment-author-img' }),
+	            React.createElement(
+	              'button',
+	              { className: 'btn btn-sm btn-primary', type: 'submit' },
+	              'Post Comment'
+	            )
+	          )
+	        )
+	      ),
+	      React.createElement(CommentList, { comments: props.comments })
+	    );
+	  } else {
+	    return React.createElement(
+	      'div',
+	      { className: 'col-xs-12 col-md-8 offset-md-2' },
+	      React.createElement(
+	        'p',
+	        null,
+	        React.createElement(
+	          'a',
+	          { 'ui-sref': 'app.login' },
+	          'Sign in'
+	        ),
+	        ' or ',
+	        React.createElement(
+	          'a',
+	          { 'ui-sref': 'app.register' },
+	          'sign up'
+	        ),
+	        ' to add comments on this article.'
+	      ),
+	      React.createElement(CommentList, { comments: props.comments })
+	    );
+	  }
+	};
+
+	var Article = function (_React$Component) {
+	  _inherits(Article, _React$Component);
+
+	  function Article() {
+	    _classCallCheck(this, Article);
+
+	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Article).call(this));
+
+	    _this.state = store.getState();
+	    return _this;
+	  }
+
+	  _createClass(Article, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      var _this2 = this;
+
+	      this.unsubscribe = store.subscribe(function () {
+	        _this2.setState(store.getState());
+	      });
+	    }
+	  }, {
+	    key: 'componentWillMount',
+	    value: function componentWillMount() {
+	      store.dispatch({
+	        type: 'ARTICLE_PAGE_LOADED',
+	        payload: Promise.all([agent.Articles.get(this.props.params.id), agent.Comments.forArticle(this.props.params.id)])
+	      });
+	    }
+	  }, {
+	    key: 'componentWillUnmount',
+	    value: function componentWillUnmount() {
+	      this.unsubscribe && this.unsubscribe();
+	      store.dispatch({ type: 'ARTICLE_PAGE_UNLOADED' });
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      if (!this.state.article) {
+	        return null;
+	      }
+
+	      var markup = { __html: this.state.article.body };
+
+	      return React.createElement(
+	        'div',
+	        { className: 'article-page' },
+	        React.createElement(
+	          'div',
+	          { className: 'banner' },
+	          React.createElement(
+	            'div',
+	            { className: 'container' },
+	            React.createElement(
+	              'h1',
+	              null,
+	              this.state.article.title
+	            )
+	          )
+	        ),
+	        React.createElement(
+	          'div',
+	          { className: 'container page' },
+	          React.createElement(
+	            'div',
+	            { className: 'row article-content' },
+	            React.createElement(
+	              'div',
+	              { className: 'col-xs-12' },
+	              React.createElement('div', { dangerouslySetInnerHTML: markup }),
+	              React.createElement(
+	                'ul',
+	                { className: 'tag-list' },
+	                this.state.article.tagList.map(function (tag) {
+	                  return React.createElement(
+	                    'li',
+	                    {
+	                      className: 'tag-default tag-pill tag-outline',
+	                      key: tag },
+	                    tag
+	                  );
+	                })
+	              )
+	            )
+	          ),
+	          React.createElement('hr', null),
+	          React.createElement('div', { className: 'article-actions' }),
+	          React.createElement(
+	            'div',
+	            { className: 'row' },
+	            React.createElement(CommentContainer, {
+	              comments: this.state.comments || [],
+	              currentUser: this.state.currentUser })
+	          )
+	        )
+	      );
+	    }
+	  }]);
+
+	  return Article;
+	}(React.Component);
+
+	module.exports = Article;
 
 /***/ }
 /******/ ]);

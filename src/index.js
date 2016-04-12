@@ -7,6 +7,7 @@ const agent = require('./agent');
 const history = require('history');
 const store = require('./store');
 
+const Article = require('./components/Article');
 const Editor = require('./components/Editor');
 const Header = require('./components/Header');
 const Home = require('./components/Home');
@@ -71,6 +72,7 @@ ReactDOM.render((
       <Router.Route path="login" component={Login} />
       <Router.Route path="register" component={Register} />
       <Router.Route path="editor" component={Editor} />
+      <Router.Route path="article/:id" component={Article} />
     </Router.Route>
   </Router.Router>
 ), document.getElementById('main'));

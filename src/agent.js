@@ -42,15 +42,23 @@ const Articles = {
     requests.get('/articles?limit=10&offset=0'),
   feed: () =>
     requests.get('/articles/feed?limit=10&offset=0'),
+  get: slug =>
+    requests.get(`/articles/${slug}`),
   update: article =>
     requests.put(`/articles/${article.slug}`, _.omit(article, ['slug'])),
   create: article =>
     requests.post('/articles', article)
 };
 
+const Comments = {
+  forArticle: slug =>
+    requests.get(`/articles/${slug}/comments`)
+};
+
 module.exports = {
   Articles,
   Auth,
+  Comments,
   Tags,
   setToken: _token => { token = _token; }
 };
