@@ -22,9 +22,10 @@ module.exports = (state = defaultState, action) => {
       state.article = action.payload[0].article;
       state.comments = action.payload[1].comments;
       break;
-    case 'ARTICLE_PAGE_LOADED':
+    case 'ARTICLE_PAGE_UNLOADED':
       delete state.article;
       delete state.comments;
+      delete state.commentErrors;
       break;
     case 'HOME_PAGE_LOADED':
       state.tags = action.payload[0].tags;
@@ -39,6 +40,14 @@ module.exports = (state = defaultState, action) => {
     case 'ADD_TAG':
       state.tagList.push(state.tagInput);
       state.tagInput = '';
+      break;
+    case 'ADD_COMMENT':
+      if (action.error) {
+        state.commentErrors = action.payload.errors;
+      } else {
+        state.comments = state.comments || [];
+        state.comments.unshift(action.payload.comment);
+      }
       break;
     case 'REMOVE_TAG':
       const index = state.tagList.indexOf(action.tag);
