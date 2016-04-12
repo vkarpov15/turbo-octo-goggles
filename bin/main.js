@@ -25428,6 +25428,9 @@
 	};
 
 	var requests = {
+	  del: function del(url) {
+	    return superagent.del('' + API_ROOT + url).use(tokenPlugin).then(responseBody);
+	  },
 	  get: function get(url) {
 	    return superagent.get('' + API_ROOT + url).use(tokenPlugin).then(responseBody);
 	  },
@@ -25478,6 +25481,9 @@
 	var Comments = {
 	  create: function create(slug, comment) {
 	    return requests.post('/articles/' + slug + '/comments', { comment: comment });
+	  },
+	  delete: function _delete(slug, commentId) {
+	    return requests.del('/articles/' + slug + '/comments/' + commentId);
 	  },
 	  forArticle: function forArticle(slug) {
 	    return requests.get('/articles/' + slug + '/comments');
@@ -37202,6 +37208,12 @@
 	      state.tagList.push(state.tagInput);
 	      state.tagInput = '';
 	      break;
+	    case 'REMOVE_TAG':
+	      var index = state.tagList.indexOf(action.tag);
+	      if (index !== -1) {
+	        array.splice(state.tagList, index);
+	      }
+	      break;
 	    case 'ADD_COMMENT':
 	      if (action.error) {
 	        state.commentErrors = action.payload.errors;
@@ -37210,11 +37222,11 @@
 	        state.comments.unshift(action.payload.comment);
 	      }
 	      break;
-	    case 'REMOVE_TAG':
-	      var index = state.tagList.indexOf(action.tag);
-	      if (index !== -1) {
-	        array.splice(state.tagList, index);
-	      }
+	    case 'DELETE_COMMENT':
+	      var filter = function filter(comment) {
+	        return comment.id !== action.commentId;
+	      };
+	      state.comments = _.filter(state.comments, filter);
 	      break;
 	    case 'EDITOR_PAGE_LOADED':
 	      state.title = '';
@@ -37285,8 +37297,28 @@
 	var agent = __webpack_require__(223);
 	var store = __webpack_require__(238);
 
+	var DeleteButton = function DeleteButton(props) {
+	  var del = function del() {
+	    store.dispatch({
+	      type: 'DELETE_COMMENT',
+	      payload: agent.Comments.delete(props.slug, props.commentId),
+	      commentId: props.commentId
+	    });
+	  };
+
+	  if (props.show) {
+	    return React.createElement(
+	      'span',
+	      { className: 'mod-options' },
+	      React.createElement('i', { className: 'ion-trash-a', onClick: del })
+	    );
+	  }
+	  return;
+	};
+
 	var Comment = function Comment(props) {
 	  var comment = props.comment;
+	  var show = props.currentUser && props.currentUser.username === comment.author.username;
 	  return React.createElement(
 	    'div',
 	    { className: 'card' },
@@ -37318,11 +37350,7 @@
 	        { className: 'date-posted' },
 	        new Date(comment.createdAt).toDateString()
 	      ),
-	      React.createElement(
-	        'span',
-	        { className: 'mod-options' },
-	        React.createElement('i', { className: 'ion-trash-a' })
-	      )
+	      React.createElement(DeleteButton, { show: show, slug: props.slug, commentId: comment.id })
 	    )
 	  );
 	};
@@ -37332,7 +37360,11 @@
 	    'div',
 	    null,
 	    props.comments.map(function (comment) {
-	      return React.createElement(Comment, { comment: comment, key: comment.id });
+	      return React.createElement(Comment, {
+	        comment: comment,
+	        currentUser: props.currentUser,
+	        slug: props.slug,
+	        key: comment.id });
 	    })
 	  );
 	};
@@ -37408,7 +37440,10 @@
 	        React.createElement('list-errors', { errors: props.errors }),
 	        React.createElement(CommentInput, { slug: props.slug, currentUser: props.currentUser })
 	      ),
-	      React.createElement(CommentList, { comments: props.comments })
+	      React.createElement(CommentList, {
+	        comments: props.comments,
+	        slug: props.slug,
+	        currentUser: props.currentUser })
 	    );
 	  } else {
 	    return React.createElement(
@@ -37430,7 +37465,10 @@
 	        ),
 	        ' to add comments on this article.'
 	      ),
-	      React.createElement(CommentList, { comments: props.comments })
+	      React.createElement(CommentList, {
+	        comments: props.comments,
+	        slug: props.slug,
+	        currentUser: props.currentUser })
 	    );
 	  }
 	};

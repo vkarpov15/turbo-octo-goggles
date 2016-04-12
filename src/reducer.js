@@ -41,6 +41,12 @@ module.exports = (state = defaultState, action) => {
       state.tagList.push(state.tagInput);
       state.tagInput = '';
       break;
+    case 'REMOVE_TAG':
+      const index = state.tagList.indexOf(action.tag);
+      if (index !== -1) {
+        array.splice(state.tagList, index);
+      }
+      break;
     case 'ADD_COMMENT':
       if (action.error) {
         state.commentErrors = action.payload.errors;
@@ -49,11 +55,9 @@ module.exports = (state = defaultState, action) => {
         state.comments.unshift(action.payload.comment);
       }
       break;
-    case 'REMOVE_TAG':
-      const index = state.tagList.indexOf(action.tag);
-      if (index !== -1) {
-        array.splice(state.tagList, index);
-      }
+    case 'DELETE_COMMENT':
+      const filter = comment => comment.id !== action.commentId;
+      state.comments = _.filter(state.comments, filter);
       break;
     case 'EDITOR_PAGE_LOADED':
       state.title = '';

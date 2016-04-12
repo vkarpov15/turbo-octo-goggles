@@ -5,8 +5,29 @@ const Router = require('react-router');
 const agent = require('../agent');
 const store = require('../store');
 
+const DeleteButton = props => {
+  const del = () => {
+    store.dispatch({
+      type: 'DELETE_COMMENT',
+      payload: agent.Comments.delete(props.slug, props.commentId),
+      commentId: props.commentId
+    });
+  };
+
+  if (props.show) {
+    return (
+      <span className="mod-options">
+        <i className="ion-trash-a" onClick={del}></i>
+      </span>
+    );
+  }
+  return;
+};
+
 const Comment = props => {
   const comment = props.comment;
+  const show = props.currentUser &&
+    props.currentUser.username === comment.author.username;
   return (
     <div className="card">
       <div className="card-block">
@@ -23,9 +44,7 @@ const Comment = props => {
         <span className="date-posted">
           {new Date(comment.createdAt).toDateString()}
         </span>
-        <span className="mod-options">
-          <i className="ion-trash-a"></i>
-        </span>
+        <DeleteButton show={show} slug={props.slug} commentId={comment.id} />
       </div>
     </div>
   );
@@ -37,7 +56,11 @@ const CommentList = props => {
       {
         props.comments.map(comment => {
           return (
-            <Comment comment={comment} key={comment.id} />
+            <Comment
+              comment={comment}
+              currentUser={props.currentUser}
+              slug={props.slug}
+              key={comment.id} />
           );
         })
       }
@@ -99,7 +122,10 @@ const CommentContainer = props => {
           <CommentInput slug={props.slug} currentUser={props.currentUser} />
         </div>
 
-        <CommentList comments={props.comments} />
+        <CommentList
+          comments={props.comments}
+          slug={props.slug}
+          currentUser={props.currentUser} />
       </div>
     );
   } else {
@@ -109,7 +135,10 @@ const CommentContainer = props => {
           <a ui-sref="app.login">Sign in</a> or <a ui-sref="app.register">sign up</a> to add comments on this article.
         </p>
 
-        <CommentList comments={props.comments} />
+        <CommentList
+          comments={props.comments}
+          slug={props.slug}
+          currentUser={props.currentUser} />
       </div>
     );
   }
