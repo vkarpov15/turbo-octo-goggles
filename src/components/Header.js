@@ -39,7 +39,7 @@ const LoggedInView = props => {
       <ul className="nav navbar-nav pull-xs-right">
 
         <li className="nav-item">
-          <Router.Link to="home" className="nav-link">
+          <Router.Link to="" className="nav-link">
             Home
           </Router.Link>
         </li>

@@ -37540,7 +37540,7 @@
 	        { className: 'nav-item' },
 	        React.createElement(
 	          Router.Link,
-	          { to: 'home', className: 'nav-link' },
+	          { to: '', className: 'nav-link' },
 	          'Home'
 	        )
 	      ),
