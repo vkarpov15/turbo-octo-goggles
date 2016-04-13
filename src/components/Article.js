@@ -168,6 +168,12 @@ const ArticleMeta = props => {
 
 const ArticleActions = props => {
   const article = props.article;
+  const del = () => {
+    store.dispatch({
+      type: 'DELETE_ARTICLE',
+      payload: agent.Articles.del(article.slug)
+    });
+  };
   if (props.canModify) {
     return (
       <span>
@@ -178,7 +184,7 @@ const ArticleActions = props => {
           <i className="ion-edit"></i> Edit Article
         </Router.Link>
 
-        <button className="btn btn-outline-danger btn-sm">
+        <button className="btn btn-outline-danger btn-sm" onClick={del}>
           <i className="ion-trash-a"></i> Delete Article
         </button>
 

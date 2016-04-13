@@ -22,6 +22,9 @@ module.exports = (state = defaultState, action) => {
       state.article = action.payload[0].article;
       state.comments = action.payload[1].comments;
       break;
+    case 'DELETE_ARTICLE':
+      state.redirectTo = '/';
+      break;
     case 'ARTICLE_PAGE_UNLOADED':
       delete state.article;
       delete state.comments;

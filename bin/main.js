@@ -25470,6 +25470,9 @@
 	  all: function all() {
 	    return requests.get('/articles?limit=10&offset=0');
 	  },
+	  del: function del(slug) {
+	    return requests.del('/articles/' + slug);
+	  },
 	  feed: function feed() {
 	    return requests.get('/articles/feed?limit=10&offset=0');
 	  },
@@ -37195,6 +37198,9 @@
 	      state.article = action.payload[0].article;
 	      state.comments = action.payload[1].comments;
 	      break;
+	    case 'DELETE_ARTICLE':
+	      state.redirectTo = '/';
+	      break;
 	    case 'ARTICLE_PAGE_UNLOADED':
 	      delete state.article;
 	      delete state.comments;
@@ -37554,6 +37560,12 @@
 
 	var ArticleActions = function ArticleActions(props) {
 	  var article = props.article;
+	  var del = function del() {
+	    store.dispatch({
+	      type: 'DELETE_ARTICLE',
+	      payload: agent.Articles.del(article.slug)
+	    });
+	  };
 	  if (props.canModify) {
 	    return React.createElement(
 	      'span',
@@ -37568,7 +37580,7 @@
 	      ),
 	      React.createElement(
 	        'button',
-	        { className: 'btn btn-outline-danger btn-sm' },
+	        { className: 'btn btn-outline-danger btn-sm', onClick: del },
 	        React.createElement('i', { className: 'ion-trash-a' }),
 	        ' Delete Article'
 	      )

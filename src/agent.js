@@ -44,6 +44,8 @@ const Tags = {
 const Articles = {
   all: () =>
     requests.get('/articles?limit=10&offset=0'),
+  del: slug =>
+    requests.del(`/articles/${slug}`),
   feed: () =>
     requests.get('/articles/feed?limit=10&offset=0'),
   get: slug =>
