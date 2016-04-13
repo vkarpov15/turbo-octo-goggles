@@ -67,6 +67,7 @@
 	var Home = __webpack_require__(256);
 	var Login = __webpack_require__(259);
 	var Register = __webpack_require__(260);
+	var Settings = __webpack_require__(261);
 
 	var App = function (_React$Component) {
 	  _inherits(App, _React$Component);
@@ -144,7 +145,8 @@
 	    React.createElement(Router.Route, { path: 'login', component: Login }),
 	    React.createElement(Router.Route, { path: 'register', component: Register }),
 	    React.createElement(Router.Route, { path: 'editor', component: Editor }),
-	    React.createElement(Router.Route, { path: 'article/:id', component: Article })
+	    React.createElement(Router.Route, { path: 'article/:id', component: Article }),
+	    React.createElement(Router.Route, { path: 'settings', component: Settings })
 	  )
 	), document.getElementById('main'));
 
@@ -25451,6 +25453,9 @@
 	  },
 	  register: function register(username, email, password) {
 	    return requests.post('/users', { user: { username: username, email: email, password: password } });
+	  },
+	  save: function save(user) {
+	    return requests.put('/user', { user: user });
 	  }
 	};
 
@@ -37273,6 +37278,22 @@
 	        delete state[key];
 	      }
 	      break;
+	    case 'SETTINGS_SAVED':
+	      if (action.error) {
+	        state.errors = action.payload.errors;
+	      } else {
+	        state.redirectTo = '/';
+	        state.currentUser = action.payload.user;
+	      }
+	      break;
+	    case 'SETTINGS_PAGE_UNLOADED':
+	      var _arr2 = ['errors'];
+
+	      for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
+	        var _key = _arr2[_i2];
+	        delete state[_key];
+	      }
+	      break;
 	  }
 
 	  return state;
@@ -38612,6 +38633,232 @@
 	}(React.Component);
 
 	module.exports = Register;
+
+/***/ },
+/* 261 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var ListErrors = __webpack_require__(254);
+	var React = __webpack_require__(160);
+	var Router = __webpack_require__(166);
+	var agent = __webpack_require__(223);
+	var store = __webpack_require__(238);
+
+	var SettingsForm = function (_React$Component) {
+	  _inherits(SettingsForm, _React$Component);
+
+	  function SettingsForm() {
+	    _classCallCheck(this, SettingsForm);
+
+	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(SettingsForm).call(this));
+
+	    _this.state = {
+	      image: '',
+	      username: '',
+	      bio: '',
+	      email: '',
+	      password: ''
+	    };
+
+	    _this.updateState = function (field) {
+	      return function (ev) {
+	        var state = _this.state;
+	        var newState = Object.assign({}, state, _defineProperty({}, field, ev.target.value));
+	        _this.setState(newState);
+	      };
+	    };
+
+	    _this.submitForm = function (ev) {
+	      ev.preventDefault();
+
+	      var user = Object.assign({}, _this.state);
+	      if (!user.password) {
+	        delete user.password;
+	      }
+	      store.dispatch({
+	        type: 'SETTINGS_SAVED',
+	        payload: agent.Auth.save(user)
+	      });
+	    };
+	    return _this;
+	  }
+
+	  _createClass(SettingsForm, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      var _this2 = this;
+
+	      if (this.props.currentUser) {
+	        var state = Object.assign({}, this.state, {
+	          image: this.props.currentUser.image || '',
+	          username: this.props.currentUser.username,
+	          bio: this.props.currentUser.bio,
+	          email: this.props.currentUser.email
+	        });
+	        this.setState(state);
+	      }
+
+	      this.unsubscribe = store.subscribe(function () {
+	        _this2.setState(store.getState());
+	      });
+	    }
+	  }, {
+	    key: 'componentWillUnmount',
+	    value: function componentWillUnmount() {
+	      this.unsubscribe && this.unsubscribe();
+	      store.dispatch({ type: 'SETTINGS_PAGE_UNLOADED' });
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      return React.createElement(
+	        'form',
+	        { onSubmit: this.submitForm },
+	        React.createElement(
+	          'fieldset',
+	          null,
+	          React.createElement(
+	            'fieldset',
+	            { className: 'form-group' },
+	            React.createElement('input', { className: 'form-control',
+	              type: 'text',
+	              placeholder: 'URL of profile picture',
+	              value: this.state.image,
+	              onChange: this.updateState('image') })
+	          ),
+	          React.createElement(
+	            'fieldset',
+	            { className: 'form-group' },
+	            React.createElement('input', { className: 'form-control form-control-lg',
+	              type: 'text',
+	              placeholder: 'Username',
+	              value: this.state.username,
+	              onChange: this.updateState('username') })
+	          ),
+	          React.createElement(
+	            'fieldset',
+	            { className: 'form-group' },
+	            React.createElement('textarea', { className: 'form-control form-control-lg',
+	              rows: '8',
+	              placeholder: 'Short bio about you',
+	              value: this.state.bio,
+	              onChange: this.updateState('bio') })
+	          ),
+	          React.createElement(
+	            'fieldset',
+	            { className: 'form-group' },
+	            React.createElement('input', { className: 'form-control form-control-lg',
+	              type: 'email',
+	              placeholder: 'Email',
+	              value: this.state.email,
+	              onChange: this.updateState('email') })
+	          ),
+	          React.createElement(
+	            'fieldset',
+	            { className: 'form-group' },
+	            React.createElement('input', { className: 'form-control form-control-lg',
+	              type: 'password',
+	              placeholder: 'New Password',
+	              value: this.state.password,
+	              onChange: this.updateState('password') })
+	          ),
+	          React.createElement(
+	            'button',
+	            { className: 'btn btn-lg btn-primary pull-xs-right',
+	              type: 'submit' },
+	            'Update Settings'
+	          )
+	        )
+	      );
+	    }
+	  }]);
+
+	  return SettingsForm;
+	}(React.Component);
+
+	var Settings = function (_React$Component2) {
+	  _inherits(Settings, _React$Component2);
+
+	  function Settings() {
+	    _classCallCheck(this, Settings);
+
+	    var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Settings).call(this));
+
+	    _this3.state = store.getState();
+
+	    _this3.submitForm = function (ev) {
+	      ev.preventDefault();
+	    };
+	    return _this3;
+	  }
+
+	  _createClass(Settings, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      var _this4 = this;
+
+	      this.unsubscribe = store.subscribe(function () {
+	        _this4.setState(store.getState());
+	      });
+	    }
+	  }, {
+	    key: 'componentWillUnmount',
+	    value: function componentWillUnmount() {
+	      this.unsubscribe && this.unsubscribe();
+	      store.dispatch({ type: 'SETTINGS_PAGE_UNLOADED' });
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      return React.createElement(
+	        'div',
+	        { className: 'settings-page' },
+	        React.createElement(
+	          'div',
+	          { className: 'container page' },
+	          React.createElement(
+	            'div',
+	            { className: 'row' },
+	            React.createElement(
+	              'div',
+	              { className: 'col-md-6 offset-md-3 col-xs-12' },
+	              React.createElement(
+	                'h1',
+	                { className: 'text-xs-center' },
+	                'Your Settings'
+	              ),
+	              React.createElement(ListErrors, { errors: this.state.errors }),
+	              React.createElement(SettingsForm, { currentUser: this.state.currentUser }),
+	              React.createElement('hr', null),
+	              React.createElement(
+	                'button',
+	                { className: 'btn btn-outline-danger',
+	                  'ng-click': '$ctrl._User.logout()' },
+	                'Or click here to logout.'
+	              )
+	            )
+	          )
+	        )
+	      );
+	    }
+	  }]);
+
+	  return Settings;
+	}(React.Component);
+
+	module.exports = Settings;
 
 /***/ }
 /******/ ]);

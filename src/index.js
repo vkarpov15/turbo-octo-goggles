@@ -13,6 +13,7 @@ const Header = require('./components/Header');
 const Home = require('./components/Home');
 const Login = require('./components/Login');
 const Register = require('./components/Register');
+const Settings = require('./components/Settings');
 
 class App extends React.Component {
   constructor() {
@@ -73,6 +74,7 @@ ReactDOM.render((
       <Router.Route path="register" component={Register} />
       <Router.Route path="editor" component={Editor} />
       <Router.Route path="article/:id" component={Article} />
+      <Router.Route path="settings" component={Settings} />
     </Router.Route>
   </Router.Router>
 ), document.getElementById('main'));

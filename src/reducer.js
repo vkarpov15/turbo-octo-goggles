@@ -101,6 +101,19 @@ module.exports = (state = defaultState, action) => {
         delete state[key];
       }
       break;
+    case 'SETTINGS_SAVED':
+      if (action.error) {
+        state.errors = action.payload.errors;
+      } else {
+        state.redirectTo = '/';
+        state.currentUser = action.payload.user;
+      }
+      break;
+    case 'SETTINGS_PAGE_UNLOADED':
+      for (const key of ['errors']) {
+        delete state[key];
+      }
+      break;
   }
 
   return state;
