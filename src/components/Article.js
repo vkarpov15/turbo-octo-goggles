@@ -144,33 +144,51 @@ const CommentContainer = props => {
   }
 };
 
+const ArticleMeta = props => {
+  const article = props.article;
+  return (
+    <div className="article-meta">
+      <a>
+        <img src={article.author.image} />
+      </a>
+
+      <div className="info">
+        <a className="author">
+          {article.author.username}
+        </a>
+        <span className="date">
+          {new Date(article.createdAt).toDateString()}
+        </span>
+      </div>
+
+      <ArticleActions canModify={props.canModify} article={article} />
+    </div>
+  );
+};
+
 const ArticleActions = props => {
   const article = props.article;
   if (props.canModify) {
     return (
-      <div>
-        <span>
+      <span>
 
-          <Router.Link
-            to={`/editor/${article.slug}`}
-            className="btn btn-outline-secondary btn-sm">
-            <i className="ion-edit"></i> Edit Article
-          </Router.Link>
+        <Router.Link
+          to={`/editor/${article.slug}`}
+          className="btn btn-outline-secondary btn-sm">
+          <i className="ion-edit"></i> Edit Article
+        </Router.Link>
 
-          <button className="btn btn-outline-danger btn-sm">
-            <i className="ion-trash-a"></i> Delete Article
-          </button>
+        <button className="btn btn-outline-danger btn-sm">
+          <i className="ion-trash-a"></i> Delete Article
+        </button>
 
-        </span>
-      </div>
+      </span>
     );
   }
 
   return (
-    <div>
-      <span>
-      </span>
-    </div>
+    <span>
+    </span>
   );
 };
 
@@ -207,7 +225,8 @@ class Article extends React.Component {
     }
 
     const markup = { __html: this.state.article.body };
-
+    const canModify = this.state.currentUser.username ===
+      this.state.article.author.username;
     return (
       <div className="article-page">
 
@@ -215,6 +234,9 @@ class Article extends React.Component {
           <div className="container">
 
             <h1>{this.state.article.title}</h1>
+            <ArticleMeta
+              article={this.state.article}
+              canModify={canModify} />
 
           </div>
         </div>

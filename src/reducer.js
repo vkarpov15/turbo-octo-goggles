@@ -44,7 +44,7 @@ module.exports = (state = defaultState, action) => {
     case 'REMOVE_TAG':
       const index = state.tagList.indexOf(action.tag);
       if (index !== -1) {
-        array.splice(state.tagList, index);
+        state.tagList.splice(index, 1);
       }
       break;
     case 'ADD_COMMENT':

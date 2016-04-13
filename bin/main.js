@@ -37217,7 +37217,7 @@
 	    case 'REMOVE_TAG':
 	      var index = state.tagList.indexOf(action.tag);
 	      if (index !== -1) {
-	        array.splice(state.tagList, index);
+	        state.tagList.splice(index, 1);
 	      }
 	      break;
 	    case 'ADD_COMMENT':
@@ -37524,38 +37524,58 @@
 	  }
 	};
 
+	var ArticleMeta = function ArticleMeta(props) {
+	  var article = props.article;
+	  return React.createElement(
+	    'div',
+	    { className: 'article-meta' },
+	    React.createElement(
+	      'a',
+	      null,
+	      React.createElement('img', { src: article.author.image })
+	    ),
+	    React.createElement(
+	      'div',
+	      { className: 'info' },
+	      React.createElement(
+	        'a',
+	        { className: 'author' },
+	        article.author.username
+	      ),
+	      React.createElement(
+	        'span',
+	        { className: 'date' },
+	        new Date(article.createdAt).toDateString()
+	      )
+	    ),
+	    React.createElement(ArticleActions, { canModify: props.canModify, article: article })
+	  );
+	};
+
 	var ArticleActions = function ArticleActions(props) {
 	  var article = props.article;
 	  if (props.canModify) {
 	    return React.createElement(
-	      'div',
+	      'span',
 	      null,
 	      React.createElement(
-	        'span',
-	        null,
-	        React.createElement(
-	          Router.Link,
-	          {
-	            to: '/editor/' + article.slug,
-	            className: 'btn btn-outline-secondary btn-sm' },
-	          React.createElement('i', { className: 'ion-edit' }),
-	          ' Edit Article'
-	        ),
-	        React.createElement(
-	          'button',
-	          { className: 'btn btn-outline-danger btn-sm' },
-	          React.createElement('i', { className: 'ion-trash-a' }),
-	          ' Delete Article'
-	        )
+	        Router.Link,
+	        {
+	          to: '/editor/' + article.slug,
+	          className: 'btn btn-outline-secondary btn-sm' },
+	        React.createElement('i', { className: 'ion-edit' }),
+	        ' Edit Article'
+	      ),
+	      React.createElement(
+	        'button',
+	        { className: 'btn btn-outline-danger btn-sm' },
+	        React.createElement('i', { className: 'ion-trash-a' }),
+	        ' Delete Article'
 	      )
 	    );
 	  }
 
-	  return React.createElement(
-	    'div',
-	    null,
-	    React.createElement('span', null)
-	  );
+	  return React.createElement('span', null);
 	};
 
 	var Article = function (_React$Component2) {
@@ -37601,7 +37621,7 @@
 	      }
 
 	      var markup = { __html: this.state.article.body };
-
+	      var canModify = this.state.currentUser.username === this.state.article.author.username;
 	      return React.createElement(
 	        'div',
 	        { className: 'article-page' },
@@ -37615,7 +37635,10 @@
 	              'h1',
 	              null,
 	              this.state.article.title
-	            )
+	            ),
+	            React.createElement(ArticleMeta, {
+	              article: this.state.article,
+	              canModify: canModify })
 	          )
 	        ),
 	        React.createElement(
