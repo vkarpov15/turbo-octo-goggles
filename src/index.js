@@ -73,6 +73,7 @@ ReactDOM.render((
       <Router.Route path="login" component={Login} />
       <Router.Route path="register" component={Register} />
       <Router.Route path="editor" component={Editor} />
+      <Router.Route path="editor/:slug" component={Editor} />
       <Router.Route path="article/:id" component={Article} />
       <Router.Route path="settings" component={Settings} />
     </Router.Route>

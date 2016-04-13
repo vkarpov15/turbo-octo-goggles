@@ -39,9 +39,15 @@ class Editor extends React.Component {
         body: this.state.body,
         tagList: this.state.tagList
       };
+
+      const slug = { slug: this.state.articleSlug };
+      const promise = this.state.articleSlug ?
+        agent.Articles.update(Object.assign(article, slug)) :
+        agent.Articles.create(article);
+
       store.dispatch({
         type: 'ARTICLE_SUBMITTED',
-        payload: agent.Articles.create(article)
+        payload: promise
       });
     };
   }
@@ -53,7 +59,11 @@ class Editor extends React.Component {
   }
 
   componentWillMount() {
-    store.dispatch({ type: 'EDITOR_PAGE_LOADED' });
+    const action = { type: 'EDITOR_PAGE_LOADED' };
+    if (this.props.params.slug) {
+      action.payload = agent.Articles.get(this.props.params.slug);
+    }
+    store.dispatch(action);
   }
 
   componentWillUnmount() {

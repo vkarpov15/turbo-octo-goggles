@@ -144,6 +144,36 @@ const CommentContainer = props => {
   }
 };
 
+const ArticleActions = props => {
+  const article = props.article;
+  if (props.canModify) {
+    return (
+      <div>
+        <span>
+
+          <Router.Link
+            to={`/editor/${article.slug}`}
+            className="btn btn-outline-secondary btn-sm">
+            <i className="ion-edit"></i> Edit Article
+          </Router.Link>
+
+          <button className="btn btn-outline-danger btn-sm">
+            <i className="ion-trash-a"></i> Delete Article
+          </button>
+
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <span>
+      </span>
+    </div>
+  );
+};
+
 class Article extends React.Component {
   constructor() {
     super();

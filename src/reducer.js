@@ -60,25 +60,40 @@ module.exports = (state = defaultState, action) => {
       state.comments = _.filter(state.comments, filter);
       break;
     case 'EDITOR_PAGE_LOADED':
-      state.title = '';
-      state.description = '';
-      state.body = '';
-      state.tagInput = '';
-      state.tagList = [];
+      if (action.payload) {
+        state.articleSlug = action.payload.article.slug;
+        state.title = action.payload.article.title;
+        state.description = action.payload.article.description;
+        state.body = action.payload.article.body;
+        state.tagInput = '';
+        state.tagList = action.payload.article.tagList;
+      } else {
+        state.title = '';
+        state.description = '';
+        state.body = '';
+        state.tagInput = '';
+        state.tagList = [];
+      }
       break;
     case 'EDITOR_PAGE_UNLOADED':
-      delete state.title;
-      delete state.description;
-      delete state.body;
-      delete state.tagInput;
-      delete state.tagList;
-      delete state.errors;
+      const keys = [
+        'title',
+        'description',
+        'body',
+        'tagInput',
+        'tagList',
+        'errors',
+        'articleSlug'
+      ];
+      for (const key of keys) {
+        delete state[key];
+      }
       break;
     case 'ARTICLE_SUBMITTED':
       if (action.error) {
         state.errors = action.payload.errors;
       } else {
-        state.redirectTo = `article/${action.article.payload.slug}`;
+        state.redirectTo = `article/${action.payload.article.slug}`;
       }
       break;
     case 'CHANGE_TAB':

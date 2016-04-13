@@ -145,6 +145,7 @@
 	    React.createElement(Router.Route, { path: 'login', component: Login }),
 	    React.createElement(Router.Route, { path: 'register', component: Register }),
 	    React.createElement(Router.Route, { path: 'editor', component: Editor }),
+	    React.createElement(Router.Route, { path: 'editor/:slug', component: Editor }),
 	    React.createElement(Router.Route, { path: 'article/:id', component: Article }),
 	    React.createElement(Router.Route, { path: 'settings', component: Settings })
 	  )
@@ -25476,10 +25477,10 @@
 	    return requests.get('/articles/' + slug);
 	  },
 	  update: function update(article) {
-	    return requests.put('/articles/' + article.slug, _.omit(article, ['slug']));
+	    return requests.put('/articles/' + article.slug, { article: _.omit(article, ['slug']) });
 	  },
 	  create: function create(article) {
-	    return requests.post('/articles', article);
+	    return requests.post('/articles', { article: article });
 	  }
 	};
 
@@ -37234,25 +37235,54 @@
 	      state.comments = _.filter(state.comments, filter);
 	      break;
 	    case 'EDITOR_PAGE_LOADED':
-	      state.title = '';
-	      state.description = '';
-	      state.body = '';
-	      state.tagInput = '';
-	      state.tagList = [];
+	      if (action.payload) {
+	        state.articleSlug = action.payload.article.slug;
+	        state.title = action.payload.article.title;
+	        state.description = action.payload.article.description;
+	        state.body = action.payload.article.body;
+	        state.tagInput = '';
+	        state.tagList = action.payload.article.tagList;
+	      } else {
+	        state.title = '';
+	        state.description = '';
+	        state.body = '';
+	        state.tagInput = '';
+	        state.tagList = [];
+	      }
 	      break;
 	    case 'EDITOR_PAGE_UNLOADED':
-	      delete state.title;
-	      delete state.description;
-	      delete state.body;
-	      delete state.tagInput;
-	      delete state.tagList;
-	      delete state.errors;
+	      var keys = ['title', 'description', 'body', 'tagInput', 'tagList', 'errors', 'articleSlug'];
+	      var _iteratorNormalCompletion = true;
+	      var _didIteratorError = false;
+	      var _iteratorError = undefined;
+
+	      try {
+	        for (var _iterator = keys[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	          var key = _step.value;
+
+	          delete state[key];
+	        }
+	      } catch (err) {
+	        _didIteratorError = true;
+	        _iteratorError = err;
+	      } finally {
+	        try {
+	          if (!_iteratorNormalCompletion && _iterator.return) {
+	            _iterator.return();
+	          }
+	        } finally {
+	          if (_didIteratorError) {
+	            throw _iteratorError;
+	          }
+	        }
+	      }
+
 	      break;
 	    case 'ARTICLE_SUBMITTED':
 	      if (action.error) {
 	        state.errors = action.payload.errors;
 	      } else {
-	        state.redirectTo = 'article/' + action.article.payload.slug;
+	        state.redirectTo = 'article/' + action.payload.article.slug;
 	      }
 	      break;
 	    case 'CHANGE_TAB':
@@ -37274,8 +37304,8 @@
 	      var _arr = ['errors', 'username', 'email', 'password'];
 
 	      for (var _i = 0; _i < _arr.length; _i++) {
-	        var key = _arr[_i];
-	        delete state[key];
+	        var _key = _arr[_i];
+	        delete state[_key];
 	      }
 	      break;
 	    case 'SETTINGS_SAVED':
@@ -37290,8 +37320,8 @@
 	      var _arr2 = ['errors'];
 
 	      for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
-	        var _key = _arr2[_i2];
-	        delete state[_key];
+	        var _key2 = _arr2[_i2];
+	        delete state[_key2];
 	      }
 	      break;
 	  }
@@ -37494,6 +37524,40 @@
 	  }
 	};
 
+	var ArticleActions = function ArticleActions(props) {
+	  var article = props.article;
+	  if (props.canModify) {
+	    return React.createElement(
+	      'div',
+	      null,
+	      React.createElement(
+	        'span',
+	        null,
+	        React.createElement(
+	          Router.Link,
+	          {
+	            to: '/editor/' + article.slug,
+	            className: 'btn btn-outline-secondary btn-sm' },
+	          React.createElement('i', { className: 'ion-edit' }),
+	          ' Edit Article'
+	        ),
+	        React.createElement(
+	          'button',
+	          { className: 'btn btn-outline-danger btn-sm' },
+	          React.createElement('i', { className: 'ion-trash-a' }),
+	          ' Delete Article'
+	        )
+	      )
+	    );
+	  }
+
+	  return React.createElement(
+	    'div',
+	    null,
+	    React.createElement('span', null)
+	  );
+	};
+
 	var Article = function (_React$Component2) {
 	  _inherits(Article, _React$Component2);
 
@@ -37664,9 +37728,13 @@
 	        body: _this.state.body,
 	        tagList: _this.state.tagList
 	      };
+
+	      var slug = { slug: _this.state.articleSlug };
+	      var promise = _this.state.articleSlug ? agent.Articles.update(Object.assign(article, slug)) : agent.Articles.create(article);
+
 	      store.dispatch({
 	        type: 'ARTICLE_SUBMITTED',
-	        payload: agent.Articles.create(article)
+	        payload: promise
 	      });
 	    };
 	    return _this;
@@ -37684,7 +37752,11 @@
 	  }, {
 	    key: 'componentWillMount',
 	    value: function componentWillMount() {
-	      store.dispatch({ type: 'EDITOR_PAGE_LOADED' });
+	      var action = { type: 'EDITOR_PAGE_LOADED' };
+	      if (this.props.params.slug) {
+	        action.payload = agent.Articles.get(this.props.params.slug);
+	      }
+	      store.dispatch(action);
 	    }
 	  }, {
 	    key: 'componentWillUnmount',
