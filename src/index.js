@@ -23,7 +23,16 @@ class App extends React.Component {
     this.state = store.getState();
   }
 
-  componentWillMount() {
+  componentDidMount() {
+    store.subscribe(() => {
+      this.setState(store.getState());
+
+      if (store.getState().redirectTo) {
+        this.context.router.replace(store.getState().redirectTo);
+        store.dispatch({ type: 'REDIRECT' });
+      }
+    });
+
     const token = window.localStorage.getItem('jwt');
     if (token) {
       agent.setToken(token);
@@ -33,17 +42,6 @@ class App extends React.Component {
       type: 'APP_LOAD',
       token: token,
       payload: token ? agent.Auth.current() : null
-    });
-  }
-
-  componentDidMount() {
-    store.subscribe(() => {
-      this.setState(store.getState());
-
-      if (store.getState().redirectTo) {
-        this.context.router.replace(store.getState().redirectTo);
-        store.dispatch({ type: 'REDIRECT' });
-      }
     });
   }
 

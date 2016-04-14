@@ -144,6 +144,11 @@ class Settings extends React.Component {
     store.dispatch({ type: 'SETTINGS_PAGE_UNLOADED' });
   }
 
+  logout(ev) {
+    ev.preventDefault();
+    store.dispatch({ type: 'LOGOUT' });
+  }
+
   render() {
     return (
       <div className="settings-page">
@@ -159,8 +164,9 @@ class Settings extends React.Component {
 
               <hr />
 
-              <button className="btn btn-outline-danger"
-                ng-click="$ctrl._User.logout()">
+              <button
+                className="btn btn-outline-danger"
+                onClick={this.logout}>
                 Or click here to logout.
               </button>
 

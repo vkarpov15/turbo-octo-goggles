@@ -19,7 +19,6 @@ module.exports = (state = defaultState, action) => {
   state = home(state, action);
   state = profile(state, action);
   state = settings(state, action);
-
   switch (action.type) {
     case 'APP_LOAD':
       const assignments = {

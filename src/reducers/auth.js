@@ -28,6 +28,13 @@ module.exports = (state, action) => {
         state.inProgress = true;
       }
       break;
+    case 'LOGOUT':
+      state = Object.assign({}, state, {
+        redirectTo: '/',
+        token: null,
+        currentUser: undefined
+      });
+      break;
   }
 
   return state;

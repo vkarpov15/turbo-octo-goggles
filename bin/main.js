@@ -84,20 +84,6 @@
 	  }
 
 	  _createClass(App, [{
-	    key: 'componentWillMount',
-	    value: function componentWillMount() {
-	      var token = window.localStorage.getItem('jwt');
-	      if (token) {
-	        agent.setToken(token);
-	      }
-
-	      store.dispatch({
-	        type: 'APP_LOAD',
-	        token: token,
-	        payload: token ? agent.Auth.current() : null
-	      });
-	    }
-	  }, {
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
 	      var _this2 = this;
@@ -109,6 +95,17 @@
 	          _this2.context.router.replace(store.getState().redirectTo);
 	          store.dispatch({ type: 'REDIRECT' });
 	        }
+	      });
+
+	      var token = window.localStorage.getItem('jwt');
+	      if (token) {
+	        agent.setToken(token);
+	      }
+
+	      store.dispatch({
+	        type: 'APP_LOAD',
+	        token: token,
+	        payload: token ? agent.Auth.current() : null
 	      });
 	    }
 	  }, {
@@ -28263,6 +28260,9 @@
 	          window.localStorage.setItem('jwt', action.payload.user.token);
 	          agent.setToken(action.payload.user.token);
 	        }
+	      } else if (action.type === 'LOGOUT') {
+	        window.localStorage.setItem('jwt', '');
+	        agent.setToken(null);
 	      }
 
 	      next(action);
@@ -28304,7 +28304,6 @@
 	  state = home(state, action);
 	  state = profile(state, action);
 	  state = settings(state, action);
-
 	  switch (action.type) {
 	    case 'APP_LOAD':
 	      var assignments = {
@@ -28455,6 +28454,13 @@
 	        state = Object.assign({}, state);
 	        state.inProgress = true;
 	      }
+	      break;
+	    case 'LOGOUT':
+	      state = Object.assign({}, state, {
+	        redirectTo: '/',
+	        token: null,
+	        currentUser: undefined
+	      });
 	      break;
 	  }
 
@@ -30669,6 +30675,12 @@
 	      store.dispatch({ type: 'SETTINGS_PAGE_UNLOADED' });
 	    }
 	  }, {
+	    key: 'logout',
+	    value: function logout(ev) {
+	      ev.preventDefault();
+	      store.dispatch({ type: 'LOGOUT' });
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
 	      return React.createElement(
@@ -30693,8 +30705,9 @@
 	              React.createElement('hr', null),
 	              React.createElement(
 	                'button',
-	                { className: 'btn btn-outline-danger',
-	                  'ng-click': '$ctrl._User.logout()' },
+	                {
+	                  className: 'btn btn-outline-danger',
+	                  onClick: this.logout },
 	                'Or click here to logout.'
 	              )
 	            )
