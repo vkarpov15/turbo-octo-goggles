@@ -25473,11 +25473,17 @@
 	  del: function del(slug) {
 	    return requests.del('/articles/' + slug);
 	  },
+	  favorite: function favorite(slug) {
+	    return requests.post('/articles/' + slug + '/favorite');
+	  },
 	  feed: function feed() {
 	    return requests.get('/articles/feed?limit=10&offset=0');
 	  },
 	  get: function get(slug) {
 	    return requests.get('/articles/' + slug);
+	  },
+	  unfavorite: function unfavorite(slug) {
+	    return requests.del('/articles/' + slug + '/favorite');
 	  },
 	  update: function update(article) {
 	    return requests.put('/articles/' + article.slug, { article: _.omit(article, ['slug']) });
@@ -37225,6 +37231,15 @@
 	      state.articlesCount = action.payload.articlesCount;
 	      state.currentPage = action.page;
 	      break;
+	    case 'ARTICLE_FAVORITED':
+	    case 'ARTICLE_UNFAVORITED':
+	      state.articles.forEach(function (article) {
+	        if (article.slug === action.payload.article.slug) {
+	          article.favorited = action.payload.article.favorited;
+	          article.favoritesCount = action.payload.article.favoritesCount;
+	        }
+	      });
+	      break;
 	    case 'ADD_TAG':
 	      state.tagList.push(state.tagInput);
 	      state.tagInput = '';
@@ -38430,9 +38445,31 @@
 
 	var React = __webpack_require__(160);
 	var Router = __webpack_require__(166);
+	var agent = __webpack_require__(223);
+	var store = __webpack_require__(238);
+
+	var FAVORITED_CLASS = 'btn btn-sm btn-primary';
+	var NOT_FAVORITED_CLASS = 'btn btn-sm btn-outline-primary';
 
 	var ArticlePreview = function ArticlePreview(props) {
 	  var article = props.article;
+	  var favoriteButtonClass = article.favorited ? FAVORITED_CLASS : NOT_FAVORITED_CLASS;
+
+	  var handleClick = function handleClick(ev) {
+	    ev.preventDefault();
+	    if (article.favorited) {
+	      store.dispatch({
+	        type: 'ARTICLE_UNFAVORITED',
+	        payload: agent.Articles.unfavorite(article.slug)
+	      });
+	    } else {
+	      store.dispatch({
+	        type: 'ARTICLE_FAVORITED',
+	        payload: agent.Articles.favorite(article.slug)
+	      });
+	    }
+	  };
+
 	  return React.createElement(
 	    'div',
 	    { className: 'article-preview' },
@@ -38464,7 +38501,7 @@
 	        { className: 'pull-xs-right' },
 	        React.createElement(
 	          'button',
-	          { className: 'btn btn-sm' },
+	          { className: favoriteButtonClass, onClick: handleClick },
 	          React.createElement('i', { className: 'ion-heart' }),
 	          ' ',
 	          article.favoritesCount

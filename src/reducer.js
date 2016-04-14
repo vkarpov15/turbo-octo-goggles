@@ -49,6 +49,15 @@ module.exports = (state = defaultState, action) => {
       state.articlesCount = action.payload.articlesCount;
       state.currentPage = action.page;
       break;
+    case 'ARTICLE_FAVORITED':
+    case 'ARTICLE_UNFAVORITED':
+      state.articles.forEach(article => {
+        if (article.slug === action.payload.article.slug) {
+          article.favorited = action.payload.article.favorited;
+          article.favoritesCount = action.payload.article.favoritesCount;
+        }
+      });
+      break;
     case 'ADD_TAG':
       state.tagList.push(state.tagInput);
       state.tagInput = '';

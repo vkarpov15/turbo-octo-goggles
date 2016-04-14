@@ -2,9 +2,33 @@
 
 const React = require('react');
 const Router = require('react-router');
+const agent = require('../agent');
+const store = require('../store');
+
+const FAVORITED_CLASS = 'btn btn-sm btn-primary';
+const NOT_FAVORITED_CLASS = 'btn btn-sm btn-outline-primary';
 
 const ArticlePreview = props => {
   const article = props.article;
+  const favoriteButtonClass = article.favorited ?
+    FAVORITED_CLASS :
+    NOT_FAVORITED_CLASS;
+
+  const handleClick = ev => {
+    ev.preventDefault();
+    if (article.favorited) {
+      store.dispatch({
+        type: 'ARTICLE_UNFAVORITED',
+        payload: agent.Articles.unfavorite(article.slug)
+      });
+    } else {
+      store.dispatch({
+        type: 'ARTICLE_FAVORITED',
+        payload: agent.Articles.favorite(article.slug)
+      });
+    }
+  };
+
   return (
     <div className="article-preview">
       <div className="article-meta">
@@ -23,7 +47,7 @@ const ArticlePreview = props => {
         </div>
 
         <div className="pull-xs-right">
-          <button className="btn btn-sm">
+          <button className={favoriteButtonClass} onClick={handleClick}>
             <i className="ion-heart"></i> {article.favoritesCount}
           </button>
         </div>
