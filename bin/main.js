@@ -25482,7 +25482,7 @@
 	    return requests.get('/articles?author=' + encode(author) + '&' + limit(5, page));
 	  },
 	  byTag: function byTag(tag, page) {
-	    return requests.get('/articles?tag=' + encode(tag) + '^' + limit(10, page));
+	    return requests.get('/articles?tag=' + encode(tag) + '&' + limit(10, page));
 	  },
 	  del: function del(slug) {
 	    return requests.del('/articles/' + slug);
@@ -38179,9 +38179,22 @@
 	      'div',
 	      { className: 'tag-list' },
 	      tags.map(function (tag) {
+	        var handleClick = function handleClick(ev) {
+	          ev.preventDefault();
+	          store.dispatch({
+	            type: 'APPLY_TAG_FILTER',
+	            tag: tag,
+	            payload: agent.Articles.byTag(tag)
+	          });
+	        };
+
 	        return React.createElement(
 	          'a',
-	          { href: '', className: 'tag-default tag-pill', key: tag },
+	          {
+	            href: '',
+	            className: 'tag-default tag-pill',
+	            key: tag,
+	            onClick: handleClick },
 	          tag
 	        );
 	      })
@@ -38276,10 +38289,29 @@
 	    { className: 'nav-item' },
 	    React.createElement(
 	      'a',
-	      { href: '',
+	      {
+	        href: '',
 	        className: props.tab === 'all' ? 'nav-link active' : 'nav-link',
 	        onClick: clickHandler },
 	      'Global Feed'
+	    )
+	  );
+	};
+
+	var TagFilterTab = function TagFilterTab(props) {
+	  if (!props.tag) {
+	    return null;
+	  }
+
+	  return React.createElement(
+	    'li',
+	    { className: 'nav-item' },
+	    React.createElement(
+	      'a',
+	      { href: '', className: 'nav-link active' },
+	      React.createElement('i', { className: 'ion-pound' }),
+	      ' ',
+	      props.tag
 	    )
 	  );
 	};
@@ -38295,7 +38327,8 @@
 	        'ul',
 	        { className: 'nav nav-pills outline-active' },
 	        React.createElement(YourFeedTab, { token: props.token, tab: props.tab }),
-	        React.createElement(GlobalFeedTab, { tab: props.tab })
+	        React.createElement(GlobalFeedTab, { tab: props.tab }),
+	        React.createElement(TagFilterTab, { tag: props.tag })
 	      )
 	    ),
 	    React.createElement(ArticleList, {
@@ -38361,7 +38394,8 @@
 	              articles: this.state.articles,
 	              articlesCount: this.state.articlesCount,
 	              loading: this.state.loading,
-	              currentPage: this.state.currentPage }),
+	              currentPage: this.state.currentPage,
+	              tag: this.state.tag }),
 	            React.createElement(
 	              'div',
 	              { className: 'col-md-3' },
@@ -39415,6 +39449,14 @@
 	      state.articles = action.payload.articles;
 	      state.articlesCount = action.payload.articlesCount;
 	      state.tab = action.tab;
+	      state.currentPage = 0;
+	      state.tag = null;
+	      break;
+	    case 'APPLY_TAG_FILTER':
+	      state.articles = action.payload.articles;
+	      state.articlesCount = action.payload.articlesCount;
+	      state.tab = null;
+	      state.tag = action.tag;
 	      state.currentPage = 0;
 	      break;
 	  }

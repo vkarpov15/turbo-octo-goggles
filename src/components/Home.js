@@ -15,8 +15,21 @@ const Tags = props => {
       <div className="tag-list">
         {
           tags.map(tag => {
+            const handleClick = ev => {
+              ev.preventDefault();
+              store.dispatch({
+                type: 'APPLY_TAG_FILTER',
+                tag: tag,
+                payload: agent.Articles.byTag(tag)
+              });
+            };
+
             return (
-              <a href="" className="tag-default tag-pill" key={tag}>
+              <a
+                href=""
+                className="tag-default tag-pill"
+                key={tag}
+                onClick={handleClick}>
                 {tag}
               </a>
             );
@@ -84,14 +97,29 @@ const GlobalFeedTab = props => {
   };
   return (
     <li className="nav-item">
-      <a  href=""
-          className={ props.tab === 'all' ? 'nav-link active' : 'nav-link' }
-          onClick={clickHandler}>
+      <a
+        href=""
+        className={ props.tab === 'all' ? 'nav-link active' : 'nav-link' }
+        onClick={clickHandler}>
         Global Feed
       </a>
     </li>
   );
-}
+};
+
+const TagFilterTab = props => {
+  if (!props.tag) {
+    return null;
+  }
+
+  return (
+    <li className="nav-item">
+      <a href="" className="nav-link active">
+        <i className="ion-pound"></i> {props.tag}
+      </a>
+    </li>
+  );
+};
 
 const MainView = props => {
   return (
@@ -102,6 +130,8 @@ const MainView = props => {
           <YourFeedTab token={props.token} tab={props.tab} />
 
           <GlobalFeedTab tab={props.tab} />
+
+          <TagFilterTab tag={props.tag} />
 
         </ul>
       </div>
@@ -156,7 +186,8 @@ class Home extends React.Component {
               articles={this.state.articles}
               articlesCount={this.state.articlesCount}
               loading={this.state.loading}
-              currentPage={this.state.currentPage} />
+              currentPage={this.state.currentPage}
+              tag={this.state.tag} />
 
             <div className="col-md-3">
               <div className="sidebar">

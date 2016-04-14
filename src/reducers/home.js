@@ -21,6 +21,14 @@ module.exports = (state, action) => {
       state.articlesCount = action.payload.articlesCount;
       state.tab = action.tab;
       state.currentPage = 0;
+      state.tag = null;
+      break;
+    case 'APPLY_TAG_FILTER':
+      state.articles = action.payload.articles;
+      state.articlesCount = action.payload.articlesCount;
+      state.tab = null;
+      state.tag = action.tag;
+      state.currentPage = 0;
       break;
   }
 
