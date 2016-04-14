@@ -22,41 +22,50 @@ module.exports = (state = defaultState, action) => {
 
   switch (action.type) {
     case 'APP_LOAD':
-      state.token = action.token || null;
+      const assignments = {
+        token: action.token || null,
+        appLoaded: true
+      };
       if (action.payload) {
-        state.currentUser = action.payload.user;
+        assignments.currentUser = action.payload.user;
       }
-      state.appLoaded = true;
+      state = Object.assign({}, state, assignments)
       break;
     case 'REDIRECT':
-      state.redirectTo = null;
+      state = Object.assign({}, state, { redirectTo: null });
       break;
     case 'UPDATE_FIELD':
-      state[action.key] = action.value;
+      state = Object.assign({}, state, { [action.key]: action.value });
       break;
     case 'ARTICLE_PAGE_LOADED':
-      state.article = action.payload[0].article;
-      state.comments = action.payload[1].comments;
+      state = Object.assign({}, state, {
+        article: action.payload[0].article,
+        comments: action.payload[1].comments
+      });
       break;
     case 'DELETE_ARTICLE':
-      state.redirectTo = '/';
+      state = Object.assign({}, state, { redirectTo: '/' });
       break;
     case 'ARTICLE_PAGE_UNLOADED':
+      state = Object.assign({}, state);
       delete state.article;
       delete state.comments;
       delete state.commentErrors;
       break;
     case 'ADD_TAG':
+      state = Object.assign({}, state);
       state.tagList.push(state.tagInput);
       state.tagInput = '';
       break;
     case 'REMOVE_TAG':
+      state = Object.assign({}, state);
       const index = state.tagList.indexOf(action.tag);
       if (index !== -1) {
         state.tagList.splice(index, 1);
       }
       break;
     case 'ADD_COMMENT':
+      state = Object.assign({}, state);
       if (action.error) {
         state.commentErrors = action.payload.errors;
       } else {
@@ -65,6 +74,7 @@ module.exports = (state = defaultState, action) => {
       }
       break;
     case 'DELETE_COMMENT':
+      state = Object.assign({}, state);
       const filter = comment => comment.id !== action.commentId;
       state.comments = _.filter(state.comments, filter);
       break;

@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const superagent =
   require('superagent-promise')(require('superagent'), global.Promise);
 
@@ -43,6 +42,7 @@ const Tags = {
 };
 
 const limit = (count, p) => `limit=${count}&offset=${p ? p * count : 0}`;
+const omitSlug = article => Object.assign({}, article, { slug: undefined })
 const Articles = {
   all: page =>
     requests.get(`/articles?${limit(10, page)}`),
@@ -63,7 +63,7 @@ const Articles = {
   unfavorite: slug =>
     requests.del(`/articles/${slug}/favorite`),
   update: article =>
-    requests.put(`/articles/${article.slug}`, { article: _.omit(article, ['slug']) }),
+    requests.put(`/articles/${article.slug}`, { article: omitSlug(article) }),
   create: article =>
     requests.post('/articles', { article })
 };

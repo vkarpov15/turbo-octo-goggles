@@ -3,6 +3,7 @@
 module.exports = (state, action) => {
   switch (action.type) {
     case 'SETTINGS_SAVED':
+      state = Object.assign({}, state);
       state.inProgress = false;
       if (action.error) {
         state.errors = action.payload.errors;
@@ -12,13 +13,14 @@ module.exports = (state, action) => {
       }
       break;
     case 'SETTINGS_PAGE_UNLOADED':
+      state = Object.assign({}, state);
       for (const key of ['errors', 'inProgress']) {
         delete state[key];
       }
       break;
     case 'ASYNC_START':
       if (action.subtype === 'SETTINGS_SAVED') {
-        state.inProgress = true;
+        state = Object.assign({}, state, { inProgress: true });
       }
       break;
   }

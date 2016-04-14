@@ -4,21 +4,26 @@ module.exports = (state, action) => {
   switch (action.type) {
     case 'EDITOR_PAGE_LOADED':
       if (action.payload) {
-        state.articleSlug = action.payload.article.slug;
-        state.title = action.payload.article.title;
-        state.description = action.payload.article.description;
-        state.body = action.payload.article.body;
-        state.tagInput = '';
-        state.tagList = action.payload.article.tagList;
+        state = Object.assign({}, state, {
+          articleSlug: action.payload.article.slug,
+          title: action.payload.article.title,
+          description: action.payload.article.description,
+          body: action.payload.article.body,
+          tagInput: '',
+          tagList: action.payload.article.tagList
+        });
       } else {
-        state.title = '';
-        state.description = '';
-        state.body = '';
-        state.tagInput = '';
-        state.tagList = [];
+        state = Object.assign({}, state, {
+          title: '',
+          description: '',
+          body: '',
+          tagInput: '',
+          tagList: ''
+        });
       }
       break;
     case 'EDITOR_PAGE_UNLOADED':
+      state = Object.assign({}, state);
       const keys = [
         'title',
         'description',
@@ -34,6 +39,7 @@ module.exports = (state, action) => {
       }
       break;
     case 'ARTICLE_SUBMITTED':
+      state = Object.assign({}, state);
       state.inProgress = null;
       if (action.error) {
         state.errors = action.payload.errors;
@@ -43,7 +49,7 @@ module.exports = (state, action) => {
       break;
     case 'ASYNC_START':
       if (action.subtype === 'ARTICLE_SUBMITTED') {
-        state.inProgress = true;
+        state = Object.assign({}, state, { inProgress: true });
       }
       break;
   }

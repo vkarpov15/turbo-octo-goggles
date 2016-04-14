@@ -4,6 +4,7 @@ module.exports = (state, action) => {
   switch (action.type) {
     case 'LOGIN':
     case 'REGISTER':
+      state = Object.assign({}, state);
       state.inProgress = false;
       if (action.error) {
         state.errors = action.payload.errors;
@@ -15,6 +16,7 @@ module.exports = (state, action) => {
       break;
     case 'LOGIN_PAGE_UNLOADED':
     case 'REGISTER_PAGE_UNLOADED':
+      state = Object.assign({}, state);
       const props = ['errors', 'username', 'email', 'password', 'inProgress']
       for (const key of props) {
         delete state[key];
@@ -22,6 +24,7 @@ module.exports = (state, action) => {
       break;
     case 'ASYNC_START':
       if (action.subtype === 'LOGIN' || action.subtype === 'REGISTER') {
+        state = Object.assign({}, state);
         state.inProgress = true;
       }
       break;

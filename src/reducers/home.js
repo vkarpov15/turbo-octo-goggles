@@ -3,13 +3,16 @@
 module.exports = (state, action) => {
   switch (action.type) {
     case 'HOME_PAGE_LOADED':
-      state.tags = action.payload[0].tags;
-      state.articles = action.payload[1].articles;
-      state.articlesCount = action.payload[1].articlesCount;
-      state.currentPage = 0;
-      state.tab = action.tab;
+      state = Object.assign({}, state, {
+        tags: action.payload[0].tags,
+        articles: action.payload[1].articles,
+        articlesCount: action.payload[1].articlesCount,
+        currentPage: 0,
+        tab: action.tab
+      });
       break;
     case 'HOME_PAGE_UNLOADED':
+      state = Object.assign({}, state);
       delete state.articles;
       delete state.tags;
       delete state.tab;
@@ -17,18 +20,22 @@ module.exports = (state, action) => {
       delete state.currentPage;
       break;
     case 'CHANGE_TAB':
-      state.articles = action.payload.articles;
-      state.articlesCount = action.payload.articlesCount;
-      state.tab = action.tab;
-      state.currentPage = 0;
-      state.tag = null;
+      state = Object.assign({}, state, {
+        articles: action.payload.articles,
+        articlesCount: action.payload.articlesCount,
+        tab: action.tab,
+        currentPage: 0,
+        tag: null
+      });
       break;
     case 'APPLY_TAG_FILTER':
-      state.articles = action.payload.articles;
-      state.articlesCount = action.payload.articlesCount;
-      state.tab = null;
-      state.tag = action.tag;
-      state.currentPage = 0;
+      state = Object.assign({}, state, {
+        articles: action.payload.articles,
+        articlesCount: action.payload.articlesCount,
+        tab: null,
+        tag: action.tag,
+        currentPage: 0
+      });
       break;
   }
 
