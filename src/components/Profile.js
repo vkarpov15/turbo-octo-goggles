@@ -19,6 +19,44 @@ const EditProfileSettings = props => {
   return null;
 };
 
+const FollowUserButton = props => {
+  if (props.isUser) {
+    return null;
+  }
+
+  let classes = 'btn btn-sm action-btn';
+  if (props.user.following) {
+    classes += ' btn-secondary';
+  } else {
+    classes += ' btn-outline-secondary';
+  }
+
+  const handleClick = ev => {
+    ev.preventDefault();
+    if (props.user.following) {
+      store.dispatch({
+        type: 'UNFOLLOW_USER',
+        payload: agent.Profile.unfollow(props.user.username)
+      });
+    } else {
+      store.dispatch({
+        type: 'FOLLOW_USER',
+        payload: agent.Profile.follow(props.user.username)
+      });
+    }
+  };
+
+  return (
+    <button
+      className={classes}
+      onClick={handleClick}>
+      <i className="ion-plus-round"></i>
+      &nbsp;
+      {props.user.following ? 'Unfollow' : 'Follow'} {props.user.username}
+    </button>
+  );
+};
+
 class Profile extends React.Component {
   constructor() {
     super();
@@ -89,6 +127,7 @@ class Profile extends React.Component {
                 <p>{profile.bio}</p>
 
                 <EditProfileSettings isUser={isUser} />
+                <FollowUserButton isUser={isUser} user={profile} />
 
               </div>
             </div>

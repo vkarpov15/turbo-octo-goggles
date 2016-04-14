@@ -14,6 +14,10 @@ module.exports = (state = defaultState, action) => {
       delete state.articlesCount;
       delete state.currentPage;
       break;
+    case 'FOLLOW_USER':
+    case 'UNFOLLOW_USER':
+      state.profile = action.payload.profile;
+      break;
   }
 
   return state;

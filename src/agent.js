@@ -76,8 +76,12 @@ const Comments = {
 };
 
 const Profile = {
+  follow: username =>
+    requests.post(`/profiles/${username}/follow`),
   get: username =>
-    requests.get(`/profiles/${username}`)
+    requests.get(`/profiles/${username}`),
+  unfollow: username =>
+    requests.del(`/profiles/${username}/follow`)
 };
 
 module.exports = {

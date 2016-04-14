@@ -25520,8 +25520,14 @@
 	};
 
 	var Profile = {
+	  follow: function follow(username) {
+	    return requests.post('/profiles/' + username + '/follow');
+	  },
 	  get: function get(username) {
 	    return requests.get('/profiles/' + username);
+	  },
+	  unfollow: function unfollow(username) {
+	    return requests.del('/profiles/' + username + '/follow');
 	  }
 	};
 
@@ -37408,6 +37414,10 @@
 	      delete state.articlesCount;
 	      delete state.currentPage;
 	      break;
+	    case 'FOLLOW_USER':
+	    case 'UNFOLLOW_USER':
+	      state.profile = action.payload.profile;
+	      break;
 	  }
 
 	  return state;
@@ -38770,6 +38780,46 @@
 	  return null;
 	};
 
+	var FollowUserButton = function FollowUserButton(props) {
+	  if (props.isUser) {
+	    return null;
+	  }
+
+	  var classes = 'btn btn-sm action-btn';
+	  if (props.user.following) {
+	    classes += ' btn-secondary';
+	  } else {
+	    classes += ' btn-outline-secondary';
+	  }
+
+	  var handleClick = function handleClick(ev) {
+	    ev.preventDefault();
+	    if (props.user.following) {
+	      store.dispatch({
+	        type: 'UNFOLLOW_USER',
+	        payload: agent.Profile.unfollow(props.user.username)
+	      });
+	    } else {
+	      store.dispatch({
+	        type: 'FOLLOW_USER',
+	        payload: agent.Profile.follow(props.user.username)
+	      });
+	    }
+	  };
+
+	  return React.createElement(
+	    'button',
+	    {
+	      className: classes,
+	      onClick: handleClick },
+	    React.createElement('i', { className: 'ion-plus-round' }),
+	    ' ',
+	    props.user.following ? 'Unfollow' : 'Follow',
+	    ' ',
+	    props.user.username
+	  );
+	};
+
 	var Profile = function (_React$Component) {
 	  _inherits(Profile, _React$Component);
 
@@ -38871,7 +38921,8 @@
 	                  null,
 	                  profile.bio
 	                ),
-	                React.createElement(EditProfileSettings, { isUser: isUser })
+	                React.createElement(EditProfileSettings, { isUser: isUser }),
+	                React.createElement(FollowUserButton, { isUser: isUser, user: profile })
 	              )
 	            )
 	          )
