@@ -106,7 +106,11 @@ const MainView = props => {
         </ul>
       </div>
 
-      <ArticleList articles={props.articles} loading={props.loading} />
+      <ArticleList
+        articles={props.articles}
+        loading={props.loading}
+        articlesCount={props.articlesCount}
+        currentPage={props.currentPage} />
     </div>
   );
 };
@@ -150,7 +154,9 @@ class Home extends React.Component {
               token={this.state.token}
               tab={this.state.tab}
               articles={this.state.articles}
-              loading={this.state.loading} />
+              articlesCount={this.state.articlesCount}
+              loading={this.state.loading}
+              currentPage={this.state.currentPage} />
 
             <div className="col-md-3">
               <div className="sidebar">

@@ -33,12 +33,21 @@ module.exports = (state = defaultState, action) => {
     case 'HOME_PAGE_LOADED':
       state.tags = action.payload[0].tags;
       state.articles = action.payload[1].articles;
+      state.articlesCount = action.payload[1].articlesCount;
+      state.currentPage = 0;
       state.tab = action.tab;
       break;
     case 'HOME_PAGE_UNLOADED':
       delete state.articles;
       delete state.tags;
       delete state.tab;
+      delete state.articlesCount;
+      delete state.currentPage;
+      break;
+    case 'SET_PAGE':
+      state.articles = action.payload.articles;
+      state.articlesCount = action.payload.articlesCount;
+      state.currentPage = action.page;
       break;
     case 'ADD_TAG':
       state.tagList.push(state.tagInput);
@@ -101,7 +110,9 @@ module.exports = (state = defaultState, action) => {
       break;
     case 'CHANGE_TAB':
       state.articles = action.payload.articles;
+      state.articlesCount = action.payload.articlesCount;
       state.tab = action.tab;
+      state.currentPage = 0;
       break;
     case 'LOGIN':
     case 'REGISTER':

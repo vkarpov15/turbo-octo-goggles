@@ -25467,8 +25467,8 @@
 	};
 
 	var Articles = {
-	  all: function all() {
-	    return requests.get('/articles?limit=10&offset=0');
+	  all: function all(page) {
+	    return requests.get('/articles?limit=10&offset=' + (page ? page * 10 : 0));
 	  },
 	  del: function del(slug) {
 	    return requests.del('/articles/' + slug);
@@ -37209,12 +37209,21 @@
 	    case 'HOME_PAGE_LOADED':
 	      state.tags = action.payload[0].tags;
 	      state.articles = action.payload[1].articles;
+	      state.articlesCount = action.payload[1].articlesCount;
+	      state.currentPage = 0;
 	      state.tab = action.tab;
 	      break;
 	    case 'HOME_PAGE_UNLOADED':
 	      delete state.articles;
 	      delete state.tags;
 	      delete state.tab;
+	      delete state.articlesCount;
+	      delete state.currentPage;
+	      break;
+	    case 'SET_PAGE':
+	      state.articles = action.payload.articles;
+	      state.articlesCount = action.payload.articlesCount;
+	      state.currentPage = action.page;
 	      break;
 	    case 'ADD_TAG':
 	      state.tagList.push(state.tagInput);
@@ -37293,7 +37302,9 @@
 	      break;
 	    case 'CHANGE_TAB':
 	      state.articles = action.payload.articles;
+	      state.articlesCount = action.payload.articlesCount;
 	      state.tab = action.tab;
+	      state.currentPage = 0;
 	      break;
 	    case 'LOGIN':
 	    case 'REGISTER':
@@ -38236,7 +38247,11 @@
 	        React.createElement(GlobalFeedTab, { tab: props.tab })
 	      )
 	    ),
-	    React.createElement(ArticleList, { articles: props.articles, loading: props.loading })
+	    React.createElement(ArticleList, {
+	      articles: props.articles,
+	      loading: props.loading,
+	      articlesCount: props.articlesCount,
+	      currentPage: props.currentPage })
 	  );
 	};
 
@@ -38293,7 +38308,9 @@
 	              token: this.state.token,
 	              tab: this.state.tab,
 	              articles: this.state.articles,
-	              loading: this.state.loading }),
+	              articlesCount: this.state.articlesCount,
+	              loading: this.state.loading,
+	              currentPage: this.state.currentPage }),
 	            React.createElement(
 	              'div',
 	              { className: 'col-md-3' },
@@ -38328,6 +38345,51 @@
 
 	var ArticlePreview = __webpack_require__(258);
 	var React = __webpack_require__(160);
+	var agent = __webpack_require__(223);
+	var store = __webpack_require__(238);
+
+	var ListPagination = function ListPagination(props) {
+	  if (props.articlesCount < 10) {
+	    return null;
+	  }
+
+	  var range = [];
+	  for (var i = 0; i < Math.ceil(props.articlesCount / 10); ++i) {
+	    range.push(i);
+	  }
+
+	  return React.createElement(
+	    'nav',
+	    null,
+	    React.createElement(
+	      'ul',
+	      { className: 'pagination' },
+	      range.map(function (v) {
+	        var isCurrent = v === props.currentPage;
+	        var setPage = function setPage(ev) {
+	          ev.preventDefault();
+	          store.dispatch({
+	            type: 'SET_PAGE',
+	            page: v,
+	            payload: agent.Articles.all(v)
+	          });
+	        };
+	        return React.createElement(
+	          'li',
+	          {
+	            className: isCurrent ? 'page-item active' : 'page-item',
+	            onClick: setPage,
+	            key: v.toString() },
+	          React.createElement(
+	            'a',
+	            { className: 'page-link', href: '' },
+	            v + 1
+	          )
+	        );
+	      })
+	    )
+	  );
+	};
 
 	var ArticleList = function ArticleList(props) {
 	  if (!props.articles) {
@@ -38351,7 +38413,10 @@
 	    null,
 	    props.articles.map(function (article) {
 	      return React.createElement(ArticlePreview, { article: article, key: article.slug });
-	    })
+	    }),
+	    React.createElement(ListPagination, {
+	      articlesCount: props.articlesCount,
+	      currentPage: props.currentPage })
 	  );
 	};
 
