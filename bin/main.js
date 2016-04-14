@@ -25481,6 +25481,9 @@
 	  byAuthor: function byAuthor(author, page) {
 	    return requests.get('/articles?author=' + encode(author) + '&' + limit(5, page));
 	  },
+	  byTag: function byTag(tag, page) {
+	    return requests.get('/articles?tag=' + encode(tag) + '^' + limit(10, page));
+	  },
 	  del: function del(slug) {
 	    return requests.del('/articles/' + slug);
 	  },
@@ -37204,6 +37207,8 @@
 
 	'use strict';
 
+	var articleList = __webpack_require__(266);
+	var home = __webpack_require__(265);
 	var profile = __webpack_require__(252);
 
 	var defaultState = {
@@ -37215,7 +37220,10 @@
 	  var state = arguments.length <= 0 || arguments[0] === undefined ? defaultState : arguments[0];
 	  var action = arguments[1];
 
+	  state = articleList(state, action);
+	  state = home(state, action);
 	  state = profile(state, action);
+
 	  switch (action.type) {
 	    case 'APP_LOAD':
 	      state.token = action.token || null;
@@ -37241,34 +37249,6 @@
 	      delete state.article;
 	      delete state.comments;
 	      delete state.commentErrors;
-	      break;
-	    case 'HOME_PAGE_LOADED':
-	      state.tags = action.payload[0].tags;
-	      state.articles = action.payload[1].articles;
-	      state.articlesCount = action.payload[1].articlesCount;
-	      state.currentPage = 0;
-	      state.tab = action.tab;
-	      break;
-	    case 'HOME_PAGE_UNLOADED':
-	      delete state.articles;
-	      delete state.tags;
-	      delete state.tab;
-	      delete state.articlesCount;
-	      delete state.currentPage;
-	      break;
-	    case 'SET_PAGE':
-	      state.articles = action.payload.articles;
-	      state.articlesCount = action.payload.articlesCount;
-	      state.currentPage = action.page;
-	      break;
-	    case 'ARTICLE_FAVORITED':
-	    case 'ARTICLE_UNFAVORITED':
-	      state.articles.forEach(function (article) {
-	        if (article.slug === action.payload.article.slug) {
-	          article.favorited = action.payload.article.favorited;
-	          article.favoritesCount = action.payload.article.favoritesCount;
-	        }
-	      });
 	      break;
 	    case 'ADD_TAG':
 	      state.tagList.push(state.tagInput);
@@ -37344,12 +37324,6 @@
 	      } else {
 	        state.redirectTo = 'article/' + action.payload.article.slug;
 	      }
-	      break;
-	    case 'CHANGE_TAB':
-	      state.articles = action.payload.articles;
-	      state.articlesCount = action.payload.articlesCount;
-	      state.tab = action.tab;
-	      state.currentPage = 0;
 	      break;
 	    case 'LOGIN':
 	    case 'REGISTER':
@@ -39414,6 +39388,66 @@
 	}(Profile);
 
 	module.exports = ProfileFavorites;
+
+/***/ },
+/* 265 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = function (state, action) {
+	  switch (action.type) {
+	    case 'HOME_PAGE_LOADED':
+	      state.tags = action.payload[0].tags;
+	      state.articles = action.payload[1].articles;
+	      state.articlesCount = action.payload[1].articlesCount;
+	      state.currentPage = 0;
+	      state.tab = action.tab;
+	      break;
+	    case 'HOME_PAGE_UNLOADED':
+	      delete state.articles;
+	      delete state.tags;
+	      delete state.tab;
+	      delete state.articlesCount;
+	      delete state.currentPage;
+	      break;
+	    case 'CHANGE_TAB':
+	      state.articles = action.payload.articles;
+	      state.articlesCount = action.payload.articlesCount;
+	      state.tab = action.tab;
+	      state.currentPage = 0;
+	      break;
+	  }
+
+	  return state;
+	};
+
+/***/ },
+/* 266 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = function (state, action) {
+	  switch (action.type) {
+	    case 'ARTICLE_FAVORITED':
+	    case 'ARTICLE_UNFAVORITED':
+	      state.articles.forEach(function (article) {
+	        if (article.slug === action.payload.article.slug) {
+	          article.favorited = action.payload.article.favorited;
+	          article.favoritesCount = action.payload.article.favoritesCount;
+	        }
+	      });
+	      break;
+	    case 'SET_PAGE':
+	      state.articles = action.payload.articles;
+	      state.articlesCount = action.payload.articlesCount;
+	      state.currentPage = action.page;
+	      break;
+	  }
+
+	  return state;
+	};
 
 /***/ }
 /******/ ]);

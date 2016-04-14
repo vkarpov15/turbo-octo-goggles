@@ -48,6 +48,8 @@ const Articles = {
     requests.get(`/articles?${limit(10, page)}`),
   byAuthor: (author, page) =>
     requests.get(`/articles?author=${encode(author)}&${limit(5, page)}`),
+  byTag: (tag, page) =>
+    requests.get(`/articles?tag=${encode(tag)}^${limit(10, page)}`),
   del: slug =>
     requests.del(`/articles/${slug}`),
   favorite: slug =>

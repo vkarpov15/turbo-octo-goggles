@@ -1,5 +1,7 @@
 'use strict';
 
+const articleList = require('./reducers/articleList');
+const home = require('./reducers/home');
 const profile = require('./reducers/profile');
 
 const defaultState = {
@@ -8,7 +10,10 @@ const defaultState = {
 };
 
 module.exports = (state = defaultState, action) => {
+  state = articleList(state, action);
+  state = home(state, action);
   state = profile(state, action);
+  
   switch (action.type) {
     case 'APP_LOAD':
       state.token = action.token || null;
@@ -34,34 +39,6 @@ module.exports = (state = defaultState, action) => {
       delete state.article;
       delete state.comments;
       delete state.commentErrors;
-      break;
-    case 'HOME_PAGE_LOADED':
-      state.tags = action.payload[0].tags;
-      state.articles = action.payload[1].articles;
-      state.articlesCount = action.payload[1].articlesCount;
-      state.currentPage = 0;
-      state.tab = action.tab;
-      break;
-    case 'HOME_PAGE_UNLOADED':
-      delete state.articles;
-      delete state.tags;
-      delete state.tab;
-      delete state.articlesCount;
-      delete state.currentPage;
-      break;
-    case 'SET_PAGE':
-      state.articles = action.payload.articles;
-      state.articlesCount = action.payload.articlesCount;
-      state.currentPage = action.page;
-      break;
-    case 'ARTICLE_FAVORITED':
-    case 'ARTICLE_UNFAVORITED':
-      state.articles.forEach(article => {
-        if (article.slug === action.payload.article.slug) {
-          article.favorited = action.payload.article.favorited;
-          article.favoritesCount = action.payload.article.favoritesCount;
-        }
-      });
       break;
     case 'ADD_TAG':
       state.tagList.push(state.tagInput);
@@ -121,12 +98,6 @@ module.exports = (state = defaultState, action) => {
       } else {
         state.redirectTo = `article/${action.payload.article.slug}`;
       }
-      break;
-    case 'CHANGE_TAB':
-      state.articles = action.payload.articles;
-      state.articlesCount = action.payload.articlesCount;
-      state.tab = action.tab;
-      state.currentPage = 0;
       break;
     case 'LOGIN':
     case 'REGISTER':
