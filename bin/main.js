@@ -37163,6 +37163,7 @@
 	  return function (next) {
 	    return function (action) {
 	      if (isPromise(action.payload)) {
+	        store.dispatch({ type: 'ASYNC_START', subtype: action.type });
 	        action.payload.then(function (res) {
 	          console.log('RESULT', res);
 	          action.payload = res;
@@ -37188,8 +37189,10 @@
 	  return function (next) {
 	    return function (action) {
 	      if (action.type === 'REGISTER' || action.type === 'LOGIN') {
-	        window.localStorage.setItem('jwt', action.payload.user.token);
-	        agent.setToken(action.payload.user.token);
+	        if (!action.error) {
+	          window.localStorage.setItem('jwt', action.payload.user.token);
+	          agent.setToken(action.payload.user.token);
+	        }
 	      }
 
 	      next(action);
@@ -37208,8 +37211,11 @@
 	'use strict';
 
 	var articleList = __webpack_require__(266);
+	var auth = __webpack_require__(268);
+	var editor = __webpack_require__(270);
 	var home = __webpack_require__(265);
 	var profile = __webpack_require__(252);
+	var settings = __webpack_require__(269);
 
 	var defaultState = {
 	  appName: 'Conduit2',
@@ -37221,8 +37227,11 @@
 	  var action = arguments[1];
 
 	  state = articleList(state, action);
+	  state = auth(state, action);
+	  state = editor(state, action);
 	  state = home(state, action);
 	  state = profile(state, action);
+	  state = settings(state, action);
 
 	  switch (action.type) {
 	    case 'APP_LOAD':
@@ -37273,92 +37282,6 @@
 	        return comment.id !== action.commentId;
 	      };
 	      state.comments = _.filter(state.comments, filter);
-	      break;
-	    case 'EDITOR_PAGE_LOADED':
-	      if (action.payload) {
-	        state.articleSlug = action.payload.article.slug;
-	        state.title = action.payload.article.title;
-	        state.description = action.payload.article.description;
-	        state.body = action.payload.article.body;
-	        state.tagInput = '';
-	        state.tagList = action.payload.article.tagList;
-	      } else {
-	        state.title = '';
-	        state.description = '';
-	        state.body = '';
-	        state.tagInput = '';
-	        state.tagList = [];
-	      }
-	      break;
-	    case 'EDITOR_PAGE_UNLOADED':
-	      var keys = ['title', 'description', 'body', 'tagInput', 'tagList', 'errors', 'articleSlug'];
-	      var _iteratorNormalCompletion = true;
-	      var _didIteratorError = false;
-	      var _iteratorError = undefined;
-
-	      try {
-	        for (var _iterator = keys[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	          var key = _step.value;
-
-	          delete state[key];
-	        }
-	      } catch (err) {
-	        _didIteratorError = true;
-	        _iteratorError = err;
-	      } finally {
-	        try {
-	          if (!_iteratorNormalCompletion && _iterator.return) {
-	            _iterator.return();
-	          }
-	        } finally {
-	          if (_didIteratorError) {
-	            throw _iteratorError;
-	          }
-	        }
-	      }
-
-	      break;
-	    case 'ARTICLE_SUBMITTED':
-	      if (action.error) {
-	        state.errors = action.payload.errors;
-	      } else {
-	        state.redirectTo = 'article/' + action.payload.article.slug;
-	      }
-	      break;
-	    case 'LOGIN':
-	    case 'REGISTER':
-	      if (action.error) {
-	        state.errors = action.payload.errors;
-	      } else {
-	        state.redirectTo = '/';
-	        state.token = action.payload.user.token;
-	        state.currentUser = action.payload.user;
-	      }
-	      break;
-	    case 'LOGIN_PAGE_UNLOADED':
-	    case 'REGISTER_PAGE_UNLOADED':
-	      var _arr = ['errors', 'username', 'email', 'password'];
-
-	      for (var _i = 0; _i < _arr.length; _i++) {
-	        var _key = _arr[_i];
-	        delete state[_key];
-	      }
-	      break;
-	    case 'SETTINGS_SAVED':
-	      if (action.error) {
-	        state.errors = action.payload.errors;
-	      } else {
-	        state.redirectTo = '/';
-	        state.currentUser = action.payload.user;
-	      }
-	      break;
-	    case 'SETTINGS_PAGE_UNLOADED':
-	      var _arr2 = ['errors'];
-
-	      for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
-	        var _key2 = _arr2[_i2];
-	        delete state[_key2];
-	      }
 	      break;
 	  }
 
@@ -37888,7 +37811,8 @@
 	                  React.createElement(
 	                    'fieldset',
 	                    { className: 'form-group' },
-	                    React.createElement('input', { className: 'form-control form-control-lg',
+	                    React.createElement('input', {
+	                      className: 'form-control form-control-lg',
 	                      type: 'text',
 	                      placeholder: 'Article Title',
 	                      value: this.state.title,
@@ -37897,7 +37821,8 @@
 	                  React.createElement(
 	                    'fieldset',
 	                    { className: 'form-group' },
-	                    React.createElement('input', { className: 'form-control',
+	                    React.createElement('input', {
+	                      className: 'form-control',
 	                      type: 'text',
 	                      placeholder: 'What\'s this article about?',
 	                      value: this.state.description,
@@ -37906,7 +37831,8 @@
 	                  React.createElement(
 	                    'fieldset',
 	                    { className: 'form-group' },
-	                    React.createElement('textarea', { className: 'form-control',
+	                    React.createElement('textarea', {
+	                      className: 'form-control',
 	                      rows: '8',
 	                      placeholder: 'Write your article (in markdown)',
 	                      value: this.state.body,
@@ -37915,7 +37841,8 @@
 	                  React.createElement(
 	                    'fieldset',
 	                    { className: 'form-group' },
-	                    React.createElement('input', { className: 'form-control',
+	                    React.createElement('input', {
+	                      className: 'form-control',
 	                      type: 'text',
 	                      placeholder: 'Enter tags',
 	                      value: this.state.tagInput,
@@ -37937,8 +37864,10 @@
 	                  ),
 	                  React.createElement(
 	                    'button',
-	                    { className: 'btn btn-lg pull-xs-right btn-primary',
+	                    {
+	                      className: 'btn btn-lg pull-xs-right btn-primary',
 	                      type: 'button',
+	                      disabled: this.state.inProgress,
 	                      onClick: this.submitForm },
 	                    'Publish Article'
 	                  )
@@ -38359,7 +38288,10 @@
 	      this.unsubscribe = store.subscribe(function () {
 	        _this3.setState(store.getState());
 	      });
-
+	    }
+	  }, {
+	    key: 'componentWillMount',
+	    value: function componentWillMount() {
 	      var tab = this.state.token ? 'feed' : 'all';
 	      var articlesPromise = this.state.token ? agent.Articles.feed() : agent.Articles.all();
 
@@ -38719,7 +38651,8 @@
 	                  React.createElement(
 	                    'fieldset',
 	                    { className: 'form-group' },
-	                    React.createElement('input', { className: 'form-control form-control-lg',
+	                    React.createElement('input', {
+	                      className: 'form-control form-control-lg',
 	                      type: 'email',
 	                      placeholder: 'Email',
 	                      value: this.state.email,
@@ -38728,7 +38661,8 @@
 	                  React.createElement(
 	                    'fieldset',
 	                    { className: 'form-group' },
-	                    React.createElement('input', { className: 'form-control form-control-lg',
+	                    React.createElement('input', {
+	                      className: 'form-control form-control-lg',
 	                      type: 'password',
 	                      placeholder: 'Password',
 	                      value: this.state.password,
@@ -38736,8 +38670,10 @@
 	                  ),
 	                  React.createElement(
 	                    'button',
-	                    { className: 'btn btn-lg btn-primary pull-xs-right',
-	                      type: 'submit' },
+	                    {
+	                      className: 'btn btn-lg btn-primary pull-xs-right',
+	                      type: 'submit',
+	                      disabled: this.state.inProgress },
 	                    'Sign in'
 	                  )
 	                )
@@ -39079,7 +39015,8 @@
 	                  React.createElement(
 	                    'fieldset',
 	                    { className: 'form-group' },
-	                    React.createElement('input', { className: 'form-control form-control-lg',
+	                    React.createElement('input', {
+	                      className: 'form-control form-control-lg',
 	                      type: 'text',
 	                      placeholder: 'Username',
 	                      value: this.state.username,
@@ -39088,7 +39025,8 @@
 	                  React.createElement(
 	                    'fieldset',
 	                    { className: 'form-group' },
-	                    React.createElement('input', { className: 'form-control form-control-lg',
+	                    React.createElement('input', {
+	                      className: 'form-control form-control-lg',
 	                      type: 'email',
 	                      placeholder: 'Email',
 	                      value: this.state.email,
@@ -39097,7 +39035,8 @@
 	                  React.createElement(
 	                    'fieldset',
 	                    { className: 'form-group' },
-	                    React.createElement('input', { className: 'form-control form-control-lg',
+	                    React.createElement('input', {
+	                      className: 'form-control form-control-lg',
 	                      type: 'password',
 	                      placeholder: 'Password',
 	                      value: this.state.password,
@@ -39105,8 +39044,10 @@
 	                  ),
 	                  React.createElement(
 	                    'button',
-	                    { className: 'btn btn-lg btn-primary pull-xs-right',
-	                      type: 'submit' },
+	                    {
+	                      className: 'btn btn-lg btn-primary pull-xs-right',
+	                      type: 'submit',
+	                      disabled: this.state.inProgress },
 	                    'Sign in'
 	                  )
 	                )
@@ -39221,7 +39162,8 @@
 	          React.createElement(
 	            'fieldset',
 	            { className: 'form-group' },
-	            React.createElement('input', { className: 'form-control',
+	            React.createElement('input', {
+	              className: 'form-control',
 	              type: 'text',
 	              placeholder: 'URL of profile picture',
 	              value: this.state.image,
@@ -39230,7 +39172,8 @@
 	          React.createElement(
 	            'fieldset',
 	            { className: 'form-group' },
-	            React.createElement('input', { className: 'form-control form-control-lg',
+	            React.createElement('input', {
+	              className: 'form-control form-control-lg',
 	              type: 'text',
 	              placeholder: 'Username',
 	              value: this.state.username,
@@ -39239,7 +39182,8 @@
 	          React.createElement(
 	            'fieldset',
 	            { className: 'form-group' },
-	            React.createElement('textarea', { className: 'form-control form-control-lg',
+	            React.createElement('textarea', {
+	              className: 'form-control form-control-lg',
 	              rows: '8',
 	              placeholder: 'Short bio about you',
 	              value: this.state.bio,
@@ -39248,7 +39192,8 @@
 	          React.createElement(
 	            'fieldset',
 	            { className: 'form-group' },
-	            React.createElement('input', { className: 'form-control form-control-lg',
+	            React.createElement('input', {
+	              className: 'form-control form-control-lg',
 	              type: 'email',
 	              placeholder: 'Email',
 	              value: this.state.email,
@@ -39257,7 +39202,8 @@
 	          React.createElement(
 	            'fieldset',
 	            { className: 'form-group' },
-	            React.createElement('input', { className: 'form-control form-control-lg',
+	            React.createElement('input', {
+	              className: 'form-control form-control-lg',
 	              type: 'password',
 	              placeholder: 'New Password',
 	              value: this.state.password,
@@ -39265,8 +39211,10 @@
 	          ),
 	          React.createElement(
 	            'button',
-	            { className: 'btn btn-lg btn-primary pull-xs-right',
-	              type: 'submit' },
+	            {
+	              className: 'btn btn-lg btn-primary pull-xs-right',
+	              type: 'submit',
+	              disabled: this.state.inProgress },
 	            'Update Settings'
 	          )
 	        )
@@ -39485,6 +39433,170 @@
 	      state.articles = action.payload.articles;
 	      state.articlesCount = action.payload.articlesCount;
 	      state.currentPage = action.page;
+	      break;
+	  }
+
+	  return state;
+	};
+
+/***/ },
+/* 267 */,
+/* 268 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = function (state, action) {
+	  switch (action.type) {
+	    case 'LOGIN':
+	    case 'REGISTER':
+	      state.inProgress = false;
+	      if (action.error) {
+	        state.errors = action.payload.errors;
+	      } else {
+	        state.redirectTo = '/';
+	        state.token = action.payload.user.token;
+	        state.currentUser = action.payload.user;
+	      }
+	      break;
+	    case 'LOGIN_PAGE_UNLOADED':
+	    case 'REGISTER_PAGE_UNLOADED':
+	      var props = ['errors', 'username', 'email', 'password', 'inProgress'];
+	      var _iteratorNormalCompletion = true;
+	      var _didIteratorError = false;
+	      var _iteratorError = undefined;
+
+	      try {
+	        for (var _iterator = props[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	          var key = _step.value;
+
+	          delete state[key];
+	        }
+	      } catch (err) {
+	        _didIteratorError = true;
+	        _iteratorError = err;
+	      } finally {
+	        try {
+	          if (!_iteratorNormalCompletion && _iterator.return) {
+	            _iterator.return();
+	          }
+	        } finally {
+	          if (_didIteratorError) {
+	            throw _iteratorError;
+	          }
+	        }
+	      }
+
+	      break;
+	    case 'ASYNC_START':
+	      if (action.subtype === 'LOGIN' || action.subtype === 'REGISTER') {
+	        state.inProgress = true;
+	      }
+	      break;
+	  }
+
+	  return state;
+	};
+
+/***/ },
+/* 269 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = function (state, action) {
+	  switch (action.type) {
+	    case 'SETTINGS_SAVED':
+	      state.inProgress = false;
+	      if (action.error) {
+	        state.errors = action.payload.errors;
+	      } else {
+	        state.redirectTo = '/';
+	        state.currentUser = action.payload.user;
+	      }
+	      break;
+	    case 'SETTINGS_PAGE_UNLOADED':
+	      var _arr = ['errors', 'inProgress'];
+
+	      for (var _i = 0; _i < _arr.length; _i++) {
+	        var key = _arr[_i];
+	        delete state[key];
+	      }
+	      break;
+	    case 'ASYNC_START':
+	      if (action.subtype === 'SETTINGS_SAVED') {
+	        state.inProgress = true;
+	      }
+	      break;
+	  }
+
+	  return state;
+	};
+
+/***/ },
+/* 270 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = function (state, action) {
+	  switch (action.type) {
+	    case 'EDITOR_PAGE_LOADED':
+	      if (action.payload) {
+	        state.articleSlug = action.payload.article.slug;
+	        state.title = action.payload.article.title;
+	        state.description = action.payload.article.description;
+	        state.body = action.payload.article.body;
+	        state.tagInput = '';
+	        state.tagList = action.payload.article.tagList;
+	      } else {
+	        state.title = '';
+	        state.description = '';
+	        state.body = '';
+	        state.tagInput = '';
+	        state.tagList = [];
+	      }
+	      break;
+	    case 'EDITOR_PAGE_UNLOADED':
+	      var keys = ['title', 'description', 'body', 'tagInput', 'tagList', 'errors', 'articleSlug', 'inProgress'];
+	      var _iteratorNormalCompletion = true;
+	      var _didIteratorError = false;
+	      var _iteratorError = undefined;
+
+	      try {
+	        for (var _iterator = keys[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	          var key = _step.value;
+
+	          delete state[key];
+	        }
+	      } catch (err) {
+	        _didIteratorError = true;
+	        _iteratorError = err;
+	      } finally {
+	        try {
+	          if (!_iteratorNormalCompletion && _iterator.return) {
+	            _iterator.return();
+	          }
+	        } finally {
+	          if (_didIteratorError) {
+	            throw _iteratorError;
+	          }
+	        }
+	      }
+
+	      break;
+	    case 'ARTICLE_SUBMITTED':
+	      state.inProgress = null;
+	      if (action.error) {
+	        state.errors = action.payload.errors;
+	      } else {
+	        state.redirectTo = 'article/' + action.payload.article.slug;
+	      }
+	      break;
+	    case 'ASYNC_START':
+	      if (action.subtype === 'ARTICLE_SUBMITTED') {
+	        state.inProgress = true;
+	      }
 	      break;
 	  }
 

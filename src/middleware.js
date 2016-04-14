@@ -4,6 +4,7 @@ const agent = require('./agent');
 
 exports.promiseMiddleware = store => next => action => {
   if (isPromise(action.payload)) {
+    store.dispatch({ type: 'ASYNC_START', subtype: action.type });
     action.payload.then(
       res => {
         console.log('RESULT', res);
@@ -28,8 +29,10 @@ exports.promiseMiddleware = store => next => action => {
 
 exports.localStorageMiddleware = store => next => action => {
   if (action.type === 'REGISTER' || action.type === 'LOGIN') {
-    window.localStorage.setItem('jwt', action.payload.user.token);
-    agent.setToken(action.payload.user.token);
+    if (!action.error) {
+      window.localStorage.setItem('jwt', action.payload.user.token);
+      agent.setToken(action.payload.user.token);
+    }
   }
 
   next(action);

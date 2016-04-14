@@ -84,7 +84,8 @@ class Editor extends React.Component {
                 <fieldset>
 
                   <fieldset className="form-group">
-                    <input className="form-control form-control-lg"
+                    <input
+                      className="form-control form-control-lg"
                       type="text"
                       placeholder="Article Title"
                       value={this.state.title}
@@ -92,7 +93,8 @@ class Editor extends React.Component {
                   </fieldset>
 
                   <fieldset className="form-group">
-                    <input className="form-control"
+                    <input
+                      className="form-control"
                       type="text"
                       placeholder="What's this article about?"
                       value={this.state.description}
@@ -100,7 +102,8 @@ class Editor extends React.Component {
                   </fieldset>
 
                   <fieldset className="form-group">
-                    <textarea className="form-control"
+                    <textarea
+                      className="form-control"
                       rows="8"
                       placeholder="Write your article (in markdown)"
                       value={this.state.body}
@@ -109,7 +112,8 @@ class Editor extends React.Component {
                   </fieldset>
 
                   <fieldset className="form-group">
-                    <input className="form-control"
+                    <input
+                      className="form-control"
                       type="text"
                       placeholder="Enter tags"
                       value={this.state.tagInput}
@@ -132,9 +136,11 @@ class Editor extends React.Component {
                     </div>
                   </fieldset>
 
-                  <button className="btn btn-lg pull-xs-right btn-primary"
-                          type="button"
-                          onClick={this.submitForm}>
+                  <button
+                    className="btn btn-lg pull-xs-right btn-primary"
+                    type="button"
+                    disabled={this.state.inProgress}
+                    onClick={this.submitForm}>
                     Publish Article
                   </button>
 

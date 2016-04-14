@@ -1,8 +1,11 @@
 'use strict';
 
 const articleList = require('./reducers/articleList');
+const auth = require('./reducers/auth');
+const editor = require('./reducers/editor');
 const home = require('./reducers/home');
 const profile = require('./reducers/profile');
+const settings = require('./reducers/settings');
 
 const defaultState = {
   appName: 'Conduit2',
@@ -11,9 +14,12 @@ const defaultState = {
 
 module.exports = (state = defaultState, action) => {
   state = articleList(state, action);
+  state = auth(state, action);
+  state = editor(state, action);
   state = home(state, action);
   state = profile(state, action);
-  
+  state = settings(state, action);
+
   switch (action.type) {
     case 'APP_LOAD':
       state.token = action.token || null;
@@ -61,72 +67,6 @@ module.exports = (state = defaultState, action) => {
     case 'DELETE_COMMENT':
       const filter = comment => comment.id !== action.commentId;
       state.comments = _.filter(state.comments, filter);
-      break;
-    case 'EDITOR_PAGE_LOADED':
-      if (action.payload) {
-        state.articleSlug = action.payload.article.slug;
-        state.title = action.payload.article.title;
-        state.description = action.payload.article.description;
-        state.body = action.payload.article.body;
-        state.tagInput = '';
-        state.tagList = action.payload.article.tagList;
-      } else {
-        state.title = '';
-        state.description = '';
-        state.body = '';
-        state.tagInput = '';
-        state.tagList = [];
-      }
-      break;
-    case 'EDITOR_PAGE_UNLOADED':
-      const keys = [
-        'title',
-        'description',
-        'body',
-        'tagInput',
-        'tagList',
-        'errors',
-        'articleSlug'
-      ];
-      for (const key of keys) {
-        delete state[key];
-      }
-      break;
-    case 'ARTICLE_SUBMITTED':
-      if (action.error) {
-        state.errors = action.payload.errors;
-      } else {
-        state.redirectTo = `article/${action.payload.article.slug}`;
-      }
-      break;
-    case 'LOGIN':
-    case 'REGISTER':
-      if (action.error) {
-        state.errors = action.payload.errors;
-      } else {
-        state.redirectTo = '/';
-        state.token = action.payload.user.token;
-        state.currentUser = action.payload.user;
-      }
-      break;
-    case 'LOGIN_PAGE_UNLOADED':
-    case 'REGISTER_PAGE_UNLOADED':
-      for (const key of ['errors', 'username', 'email', 'password']) {
-        delete state[key];
-      }
-      break;
-    case 'SETTINGS_SAVED':
-      if (action.error) {
-        state.errors = action.payload.errors;
-      } else {
-        state.redirectTo = '/';
-        state.currentUser = action.payload.user;
-      }
-      break;
-    case 'SETTINGS_PAGE_UNLOADED':
-      for (const key of ['errors']) {
-        delete state[key];
-      }
       break;
   }
 

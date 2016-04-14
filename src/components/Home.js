@@ -154,7 +154,9 @@ class Home extends React.Component {
   componentDidMount() {
     this.unsubscribe =
       store.subscribe(() => { this.setState(store.getState()) });
+  }
 
+  componentWillMount() {
     const tab = this.state.token ? 'feed' : 'all';
     const articlesPromise = this.state.token ?
       agent.Articles.feed() :
