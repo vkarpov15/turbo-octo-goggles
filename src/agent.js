@@ -6,6 +6,7 @@ const superagent =
 
 const API_ROOT = 'https://conduit.productionready.io/api';
 
+const encode = encodeURIComponent;
 const responseBody = res => res.body;
 
 let token = null;
@@ -41,13 +42,18 @@ const Tags = {
   getAll: () => requests.get('/tags')
 };
 
+const limit = (count, p) => `limit=${count}&offset=${p ? p * count : 0}`;
 const Articles = {
   all: page =>
-    requests.get(`/articles?limit=10&offset=${page ? page * 10 : 0}`),
+    requests.get(`/articles?${limit(10, page)}`),
+  byAuthor: (author, page) =>
+    requests.get(`/articles?author=${encode(author)}&${limit(5, page)}`),
   del: slug =>
     requests.del(`/articles/${slug}`),
   favorite: slug =>
     requests.post(`/articles/${slug}/favorite`),
+  favoritedBy: (author, page) =>
+    requests.get(`/articles?favorited=${encode(author)}&${limit(5, page)}`),
   feed: () =>
     requests.get('/articles/feed?limit=10&offset=0'),
   get: slug =>
@@ -69,10 +75,16 @@ const Comments = {
     requests.get(`/articles/${slug}/comments`)
 };
 
+const Profile = {
+  get: username =>
+    requests.get(`/profiles/${username}`)
+};
+
 module.exports = {
   Articles,
   Auth,
   Comments,
+  Profile,
   Tags,
   setToken: _token => { token = _token; }
 };

@@ -1,9 +1,14 @@
+'use strict';
+
+const profile = require('./reducers/profile');
+
 const defaultState = {
   appName: 'Conduit2',
   token: null
 };
 
 module.exports = (state = defaultState, action) => {
+  state = profile(state, action);
   switch (action.type) {
     case 'APP_LOAD':
       state.token = action.token || null;

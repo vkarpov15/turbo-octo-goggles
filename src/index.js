@@ -12,6 +12,8 @@ const Editor = require('./components/Editor');
 const Header = require('./components/Header');
 const Home = require('./components/Home');
 const Login = require('./components/Login');
+const Profile = require('./components/Profile');
+const ProfileFavorites = require('./components/ProfileFavorites');
 const Register = require('./components/Register');
 const Settings = require('./components/Settings');
 
@@ -76,6 +78,8 @@ ReactDOM.render((
       <Router.Route path="editor/:slug" component={Editor} />
       <Router.Route path="article/:id" component={Article} />
       <Router.Route path="settings" component={Settings} />
+      <Router.Route path="@:username" component={Profile} />
+      <Router.Route path="@:username/favorites" component={ProfileFavorites} />
     </Router.Route>
   </Router.Router>
 ), document.getElementById('main'));

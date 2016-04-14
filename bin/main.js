@@ -61,13 +61,15 @@
 	var history = __webpack_require__(234);
 	var store = __webpack_require__(238);
 
-	var Article = __webpack_require__(252);
-	var Editor = __webpack_require__(253);
-	var Header = __webpack_require__(255);
-	var Home = __webpack_require__(256);
-	var Login = __webpack_require__(259);
-	var Register = __webpack_require__(260);
-	var Settings = __webpack_require__(261);
+	var Article = __webpack_require__(253);
+	var Editor = __webpack_require__(254);
+	var Header = __webpack_require__(256);
+	var Home = __webpack_require__(257);
+	var Login = __webpack_require__(260);
+	var Profile = __webpack_require__(261);
+	var ProfileFavorites = __webpack_require__(264);
+	var Register = __webpack_require__(262);
+	var Settings = __webpack_require__(263);
 
 	var App = function (_React$Component) {
 	  _inherits(App, _React$Component);
@@ -147,7 +149,9 @@
 	    React.createElement(Router.Route, { path: 'editor', component: Editor }),
 	    React.createElement(Router.Route, { path: 'editor/:slug', component: Editor }),
 	    React.createElement(Router.Route, { path: 'article/:id', component: Article }),
-	    React.createElement(Router.Route, { path: 'settings', component: Settings })
+	    React.createElement(Router.Route, { path: 'settings', component: Settings }),
+	    React.createElement(Router.Route, { path: '@:username', component: Profile }),
+	    React.createElement(Router.Route, { path: '@:username/favorites', component: ProfileFavorites })
 	  )
 	), document.getElementById('main'));
 
@@ -25419,6 +25423,7 @@
 
 	var API_ROOT = 'https://conduit.productionready.io/api';
 
+	var encode = encodeURIComponent;
 	var responseBody = function responseBody(res) {
 	  return res.body;
 	};
@@ -25466,15 +25471,24 @@
 	  }
 	};
 
+	var limit = function limit(count, p) {
+	  return 'limit=' + count + '&offset=' + (p ? p * count : 0);
+	};
 	var Articles = {
 	  all: function all(page) {
-	    return requests.get('/articles?limit=10&offset=' + (page ? page * 10 : 0));
+	    return requests.get('/articles?' + limit(10, page));
+	  },
+	  byAuthor: function byAuthor(author, page) {
+	    return requests.get('/articles?author=' + encode(author) + '&' + limit(5, page));
 	  },
 	  del: function del(slug) {
 	    return requests.del('/articles/' + slug);
 	  },
 	  favorite: function favorite(slug) {
 	    return requests.post('/articles/' + slug + '/favorite');
+	  },
+	  favoritedBy: function favoritedBy(author, page) {
+	    return requests.get('/articles?favorited=' + encode(author) + '&' + limit(5, page));
 	  },
 	  feed: function feed() {
 	    return requests.get('/articles/feed?limit=10&offset=0');
@@ -25505,10 +25519,17 @@
 	  }
 	};
 
+	var Profile = {
+	  get: function get(username) {
+	    return requests.get('/profiles/' + username);
+	  }
+	};
+
 	module.exports = {
 	  Articles: Articles,
 	  Auth: Auth,
 	  Comments: Comments,
+	  Profile: Profile,
 	  Tags: Tags,
 	  setToken: function setToken(_token) {
 	    token = _token;
@@ -37173,9 +37194,11 @@
 
 /***/ },
 /* 251 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
+
+	var profile = __webpack_require__(252);
 
 	var defaultState = {
 	  appName: 'Conduit2',
@@ -37186,6 +37209,7 @@
 	  var state = arguments.length <= 0 || arguments[0] === undefined ? defaultState : arguments[0];
 	  var action = arguments[1];
 
+	  state = profile(state, action);
 	  switch (action.type) {
 	    case 'APP_LOAD':
 	      state.token = action.token || null;
@@ -37363,6 +37387,34 @@
 
 /***/ },
 /* 252 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = function () {
+	  var state = arguments.length <= 0 || arguments[0] === undefined ? defaultState : arguments[0];
+	  var action = arguments[1];
+
+	  switch (action.type) {
+	    case 'PROFILE_PAGE_LOADED':
+	      state.profile = action.payload[0].profile;
+	      state.articles = action.payload[1].articles;
+	      state.articlesCount = action.payload[1].articlesCount;
+	      state.currentPage = 0;
+	      break;
+	    case 'PROFILE_PAGE_UNLOADED':
+	      delete state.profile;
+	      delete state.articles;
+	      delete state.articlesCount;
+	      delete state.currentPage;
+	      break;
+	  }
+
+	  return state;
+	};
+
+/***/ },
+/* 253 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37726,7 +37778,7 @@
 	module.exports = Article;
 
 /***/ },
-/* 253 */
+/* 254 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37739,7 +37791,7 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var ListErrors = __webpack_require__(254);
+	var ListErrors = __webpack_require__(255);
 	var React = __webpack_require__(160);
 	var agent = __webpack_require__(223);
 	var store = __webpack_require__(238);
@@ -37921,7 +37973,7 @@
 	module.exports = Editor;
 
 /***/ },
-/* 254 */
+/* 255 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37975,7 +38027,7 @@
 	module.exports = ListErrors;
 
 /***/ },
-/* 255 */
+/* 256 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38115,7 +38167,7 @@
 	module.exports = Header;
 
 /***/ },
-/* 256 */
+/* 257 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
@@ -38128,7 +38180,7 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var ArticleList = __webpack_require__(257);
+	var ArticleList = __webpack_require__(258);
 	var React = __webpack_require__(160);
 	var Router = __webpack_require__(166);
 	var agent = __webpack_require__(223);
@@ -38353,12 +38405,12 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 257 */
+/* 258 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var ArticlePreview = __webpack_require__(258);
+	var ArticlePreview = __webpack_require__(259);
 	var React = __webpack_require__(160);
 	var agent = __webpack_require__(223);
 	var store = __webpack_require__(238);
@@ -38438,7 +38490,7 @@
 	module.exports = ArticleList;
 
 /***/ },
-/* 258 */
+/* 259 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38477,17 +38529,16 @@
 	      'div',
 	      { className: 'article-meta' },
 	      React.createElement(
-	        'a',
-	        { href: '' },
+	        Router.Link,
+	        { to: '@' + article.author.username },
 	        React.createElement('img', { src: article.author.image })
 	      ),
 	      React.createElement(
 	        'div',
 	        { className: 'info' },
 	        React.createElement(
-	          'a',
-	          { className: 'author',
-	            href: '' },
+	          Router.Link,
+	          { className: 'author', to: '@' + article.author.username },
 	          article.author.username
 	        ),
 	        React.createElement(
@@ -38544,7 +38595,7 @@
 	module.exports = ArticlePreview;
 
 /***/ },
-/* 259 */
+/* 260 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38557,7 +38608,7 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var ListErrors = __webpack_require__(254);
+	var ListErrors = __webpack_require__(255);
 	var React = __webpack_require__(160);
 	var Router = __webpack_require__(166);
 	var agent = __webpack_require__(223);
@@ -38686,7 +38737,7 @@
 	module.exports = Login;
 
 /***/ },
-/* 260 */
+/* 261 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38699,7 +38750,177 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var ListErrors = __webpack_require__(254);
+	var ArticleList = __webpack_require__(258);
+	var React = __webpack_require__(160);
+	var Router = __webpack_require__(166);
+	var agent = __webpack_require__(223);
+	var store = __webpack_require__(238);
+
+	var EditProfileSettings = function EditProfileSettings(props) {
+	  if (props.isUser) {
+	    return React.createElement(
+	      Router.Link,
+	      {
+	        to: 'settings',
+	        className: 'btn btn-sm btn-outline-secondary action-btn' },
+	      React.createElement('i', { className: 'ion-gear-a' }),
+	      ' Edit Profile Settings'
+	    );
+	  }
+	  return null;
+	};
+
+	var Profile = function (_React$Component) {
+	  _inherits(Profile, _React$Component);
+
+	  function Profile() {
+	    _classCallCheck(this, Profile);
+
+	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Profile).call(this));
+
+	    _this.state = store.getState();
+	    return _this;
+	  }
+
+	  _createClass(Profile, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      var _this2 = this;
+
+	      this.unsubscribe = store.subscribe(function () {
+	        _this2.setState(store.getState());
+	      });
+	    }
+	  }, {
+	    key: 'componentWillMount',
+	    value: function componentWillMount() {
+	      store.dispatch({
+	        type: 'PROFILE_PAGE_LOADED',
+	        payload: Promise.all([agent.Profile.get(this.props.params.username), agent.Articles.byAuthor(this.props.params.username)])
+	      });
+	    }
+	  }, {
+	    key: 'componentWillUnmount',
+	    value: function componentWillUnmount() {
+	      this.unsubscribe && this.unsubscribe();
+	      store.dispatch({ type: 'PROFILE_PAGE_UNLOADED' });
+	    }
+	  }, {
+	    key: 'renderTabs',
+	    value: function renderTabs() {
+	      return React.createElement(
+	        'ul',
+	        { className: 'nav nav-pills outline-active' },
+	        React.createElement(
+	          'li',
+	          { className: 'nav-item' },
+	          React.createElement(
+	            Router.Link,
+	            {
+	              className: 'nav-link active',
+	              to: '@' + this.state.profile.username },
+	            'My Articles'
+	          )
+	        ),
+	        React.createElement(
+	          'li',
+	          { className: 'nav-item' },
+	          React.createElement(
+	            Router.Link,
+	            {
+	              className: 'nav-link',
+	              to: '@' + this.state.profile.username + '/favorites' },
+	            'Favorited Articles'
+	          )
+	        )
+	      );
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var profile = this.state.profile;
+	      if (!this.state.profile) {
+	        return null;
+	      }
+
+	      var isUser = profile.username === this.state.currentUser.username;
+
+	      return React.createElement(
+	        'div',
+	        { className: 'profile-page' },
+	        React.createElement(
+	          'div',
+	          { className: 'user-info' },
+	          React.createElement(
+	            'div',
+	            { className: 'container' },
+	            React.createElement(
+	              'div',
+	              { className: 'row' },
+	              React.createElement(
+	                'div',
+	                { className: 'col-xs-12 col-md-10 offset-md-1' },
+	                React.createElement('img', { src: profile.image, className: 'user-img' }),
+	                React.createElement(
+	                  'h4',
+	                  null,
+	                  profile.username
+	                ),
+	                React.createElement(
+	                  'p',
+	                  null,
+	                  profile.bio
+	                ),
+	                React.createElement(EditProfileSettings, { isUser: isUser })
+	              )
+	            )
+	          )
+	        ),
+	        React.createElement(
+	          'div',
+	          { className: 'container' },
+	          React.createElement(
+	            'div',
+	            { className: 'row' },
+	            React.createElement(
+	              'div',
+	              { className: 'col-xs-12 col-md-10 offset-md-1' },
+	              React.createElement(
+	                'div',
+	                { className: 'articles-toggle' },
+	                this.renderTabs()
+	              ),
+	              React.createElement(ArticleList, {
+	                articles: this.state.articles,
+	                articlesCount: this.state.articlesCount,
+	                state: this.state.currentPage })
+	            )
+	          )
+	        )
+	      );
+	    }
+	  }]);
+
+	  return Profile;
+	}(React.Component);
+
+	module.exports = Profile;
+
+/***/ },
+/* 262 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var ListErrors = __webpack_require__(255);
 	var React = __webpack_require__(160);
 	var Router = __webpack_require__(166);
 	var agent = __webpack_require__(223);
@@ -38844,7 +39065,7 @@
 	module.exports = Register;
 
 /***/ },
-/* 261 */
+/* 263 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38859,7 +39080,7 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var ListErrors = __webpack_require__(254);
+	var ListErrors = __webpack_require__(255);
 	var React = __webpack_require__(160);
 	var Router = __webpack_require__(166);
 	var agent = __webpack_require__(223);
@@ -39068,6 +39289,80 @@
 	}(React.Component);
 
 	module.exports = Settings;
+
+/***/ },
+/* 264 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Profile = __webpack_require__(261);
+	var React = __webpack_require__(160);
+	var Router = __webpack_require__(166);
+	var agent = __webpack_require__(223);
+	var store = __webpack_require__(238);
+
+	var ProfileFavorites = function (_Profile) {
+	  _inherits(ProfileFavorites, _Profile);
+
+	  function ProfileFavorites() {
+	    _classCallCheck(this, ProfileFavorites);
+
+	    return _possibleConstructorReturn(this, Object.getPrototypeOf(ProfileFavorites).apply(this, arguments));
+	  }
+
+	  _createClass(ProfileFavorites, [{
+	    key: 'componentWillMount',
+	    value: function componentWillMount() {
+	      store.dispatch({
+	        type: 'PROFILE_PAGE_LOADED',
+	        payload: Promise.all([agent.Profile.get(this.props.params.username), agent.Articles.favoritedBy(this.props.params.username)])
+	      });
+	    }
+	  }, {
+	    key: 'renderTabs',
+	    value: function renderTabs() {
+	      return React.createElement(
+	        'ul',
+	        { className: 'nav nav-pills outline-active' },
+	        React.createElement(
+	          'li',
+	          { className: 'nav-item' },
+	          React.createElement(
+	            Router.Link,
+	            {
+	              className: 'nav-link',
+	              to: '@' + this.state.profile.username },
+	            'My Articles'
+	          )
+	        ),
+	        React.createElement(
+	          'li',
+	          { className: 'nav-item' },
+	          React.createElement(
+	            Router.Link,
+	            {
+	              className: 'nav-link active',
+	              to: '@' + this.state.profile.username + '/favorites' },
+	            'Favorited Articles'
+	          )
+	        )
+	      );
+	    }
+	  }]);
+
+	  return ProfileFavorites;
+	}(Profile);
+
+	module.exports = ProfileFavorites;
 
 /***/ }
 /******/ ]);

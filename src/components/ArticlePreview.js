@@ -32,15 +32,14 @@ const ArticlePreview = props => {
   return (
     <div className="article-preview">
       <div className="article-meta">
-        <a href="">
+        <Router.Link to={`@${article.author.username}`}>
           <img src={article.author.image} />
-        </a>
+        </Router.Link>
 
         <div className="info">
-          <a  className="author"
-              href="">
+          <Router.Link className="author" to={`@${article.author.username}`}>
             {article.author.username}
-          </a>
+          </Router.Link>
           <span className="date">
             {new Date(article.createdAt).toDateString()}
           </span>
