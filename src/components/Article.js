@@ -148,14 +148,14 @@ const ArticleMeta = props => {
   const article = props.article;
   return (
     <div className="article-meta">
-      <a>
+      <Router.Link to={`@${article.author.username}`}>
         <img src={article.author.image} />
-      </a>
+      </Router.Link>
 
       <div className="info">
-        <a className="author">
+        <Router.Link to={`@${article.author.username}`} className="author">
           {article.author.username}
-        </a>
+        </Router.Link>
         <span className="date">
           {new Date(article.createdAt).toDateString()}
         </span>

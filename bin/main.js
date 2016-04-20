@@ -28865,16 +28865,16 @@
 	    'div',
 	    { className: 'article-meta' },
 	    React.createElement(
-	      'a',
-	      null,
+	      Router.Link,
+	      { to: '@' + article.author.username },
 	      React.createElement('img', { src: article.author.image })
 	    ),
 	    React.createElement(
 	      'div',
 	      { className: 'info' },
 	      React.createElement(
-	        'a',
-	        { className: 'author' },
+	        Router.Link,
+	        { to: '@' + article.author.username, className: 'author' },
 	        article.author.username
 	      ),
 	      React.createElement(
@@ -30183,7 +30183,7 @@
 	        return null;
 	      }
 
-	      var isUser = profile.username === this.state.currentUser.username;
+	      var isUser = this.state.currentUser && profile.username === this.state.currentUser.username;
 
 	      return React.createElement(
 	        'div',

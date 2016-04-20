@@ -112,7 +112,8 @@ class Profile extends React.Component {
       return null;
     }
 
-    const isUser = profile.username === this.state.currentUser.username;
+    const isUser = this.state.currentUser &&
+      profile.username === this.state.currentUser.username;
 
     return (
       <div className="profile-page">
