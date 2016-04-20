@@ -3,6 +3,7 @@
 const React = require('react');
 const Router = require('react-router');
 const agent = require('../agent');
+const marked = require('marked');
 const store = require('../store');
 
 const DeleteButton = props => {
@@ -237,7 +238,7 @@ class Article extends React.Component {
       return null;
     }
 
-    const markup = { __html: this.state.article.body };
+    const markup = { __html: marked(this.state.article.body) };
     const canModify = this.state.currentUser &&
       this.state.currentUser.username === this.state.article.author.username;
     return (
