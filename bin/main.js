@@ -29310,8 +29310,8 @@
 	        'li',
 	        { className: 'nav-item' },
 	        React.createElement(
-	          'a',
-	          { className: 'nav-link' },
+	          Router.Link,
+	          { to: '/', className: 'nav-link' },
 	          'Home'
 	        )
 	      ),
@@ -29407,8 +29407,8 @@
 	          'div',
 	          { className: 'container' },
 	          React.createElement(
-	            'a',
-	            { className: 'navbar-brand' },
+	            Router.Link,
+	            { to: '/', className: 'navbar-brand' },
 	            this.props.state.appName.toLowerCase()
 	          ),
 	          React.createElement(LoggedOutView, { state: this.props.state }),

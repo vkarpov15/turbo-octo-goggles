@@ -10,9 +10,9 @@ const LoggedOutView = props => {
       <ul className="nav navbar-nav pull-xs-right">
 
         <li className="nav-item">
-          <a className="nav-link">
+          <Router.Link to="/" className="nav-link">
             Home
-          </a>
+          </Router.Link>
         </li>
 
         <li className="nav-item">
@@ -76,9 +76,9 @@ class Header extends React.Component {
       <nav className="navbar navbar-light">
         <div className="container">
 
-          <a className="navbar-brand">
+          <Router.Link to="/" className="navbar-brand">
             {this.props.state.appName.toLowerCase()}
-          </a>
+          </Router.Link>
 
 
           <LoggedOutView state={this.props.state} />
