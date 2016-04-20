@@ -34,13 +34,17 @@ const Comment = props => {
         <p className="card-text">{comment.body}</p>
       </div>
       <div className="card-footer">
-        <a className="comment-author">
+        <Router.Link
+          to={`@${comment.author.username}`}
+          className="comment-author">
           <img src={comment.author.image} className="comment-author-img" />
-        </a>
+        </Router.Link>
         &nbsp;
-        <a className="comment-author">
+        <Router.Link
+          to={`@${comment.author.username}`}
+          className="comment-author">
           {comment.author.username}
-        </a>
+        </Router.Link>
         <span className="date-posted">
           {new Date(comment.createdAt).toDateString()}
         </span>
@@ -132,7 +136,10 @@ const CommentContainer = props => {
     return (
       <div className="col-xs-12 col-md-8 offset-md-2">
         <p>
-          <a ui-sref="app.login">Sign in</a> or <a ui-sref="app.register">sign up</a> to add comments on this article.
+          <Router.Link to="login">Sign in</Router.Link>
+          &nbsp;or&nbsp;
+          <Router.Link to="register">sign up</Router.Link>
+          &nbsp;to add comments on this article.
         </p>
 
         <CommentList

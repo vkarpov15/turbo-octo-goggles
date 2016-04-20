@@ -28721,14 +28721,18 @@
 	      'div',
 	      { className: 'card-footer' },
 	      React.createElement(
-	        'a',
-	        { className: 'comment-author' },
+	        Router.Link,
+	        {
+	          to: '@' + comment.author.username,
+	          className: 'comment-author' },
 	        React.createElement('img', { src: comment.author.image, className: 'comment-author-img' })
 	      ),
 	      ' ',
 	      React.createElement(
-	        'a',
-	        { className: 'comment-author' },
+	        Router.Link,
+	        {
+	          to: '@' + comment.author.username,
+	          className: 'comment-author' },
 	        comment.author.username
 	      ),
 	      React.createElement(
@@ -28839,17 +28843,17 @@
 	        'p',
 	        null,
 	        React.createElement(
-	          'a',
-	          { 'ui-sref': 'app.login' },
+	          Router.Link,
+	          { to: 'login' },
 	          'Sign in'
 	        ),
-	        ' or ',
+	        ' or ',
 	        React.createElement(
-	          'a',
-	          { 'ui-sref': 'app.register' },
+	          Router.Link,
+	          { to: 'register' },
 	          'sign up'
 	        ),
-	        ' to add comments on this article.'
+	        ' to add comments on this article.'
 	      ),
 	      React.createElement(CommentList, {
 	        comments: props.comments,
