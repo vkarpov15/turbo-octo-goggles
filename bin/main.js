@@ -29377,7 +29377,9 @@
 	        { className: 'nav-item' },
 	        React.createElement(
 	          Router.Link,
-	          { to: 'profile', className: 'nav-link' },
+	          {
+	            to: '@' + props.state.currentUser.username,
+	            className: 'nav-link' },
 	          React.createElement('img', { src: props.state.currentUser.image, className: 'user-pic' }),
 	          props.state.currentUser.username
 	        )

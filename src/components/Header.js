@@ -57,7 +57,9 @@ const LoggedInView = props => {
         </li>
 
         <li className="nav-item">
-          <Router.Link to="profile" className="nav-link">
+          <Router.Link
+            to={`@${props.state.currentUser.username}`}
+            className="nav-link">
             <img src={props.state.currentUser.image} className="user-pic" />
             {props.state.currentUser.username}
           </Router.Link>
