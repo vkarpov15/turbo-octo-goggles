@@ -231,8 +231,8 @@ class Article extends React.Component {
     }
 
     const markup = { __html: this.state.article.body };
-    const canModify = this.state.currentUser.username ===
-      this.state.article.author.username;
+    const canModify = this.state.currentUser &&
+      this.state.currentUser.username === this.state.article.author.username;
     return (
       <div className="article-page">
 

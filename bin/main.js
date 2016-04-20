@@ -28962,7 +28962,7 @@
 	      }
 
 	      var markup = { __html: this.state.article.body };
-	      var canModify = this.state.currentUser.username === this.state.article.author.username;
+	      var canModify = this.state.currentUser && this.state.currentUser.username === this.state.article.author.username;
 	      return React.createElement(
 	        'div',
 	        { className: 'article-page' },
