@@ -27755,7 +27755,8 @@
 	var objectCtorString = funcToString.call(Object);
 
 	/**
-	 * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+	 * Used to resolve the
+	 * [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
 	 * of values.
 	 */
 	var objectToString = objectProto.toString;
@@ -28290,7 +28291,7 @@
 	var settings = __webpack_require__(254);
 
 	var defaultState = {
-	  appName: 'Conduit2',
+	  appName: 'Conduit',
 	  token: null
 	};
 

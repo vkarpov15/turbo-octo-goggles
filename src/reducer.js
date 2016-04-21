@@ -8,7 +8,7 @@ const profile = require('./reducers/profile');
 const settings = require('./reducers/settings');
 
 const defaultState = {
-  appName: 'Conduit2',
+  appName: 'Conduit',
   token: null
 };
 
