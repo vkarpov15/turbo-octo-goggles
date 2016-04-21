@@ -31609,7 +31609,7 @@
 	              React.createElement(
 	                'h1',
 	                { className: 'text-xs-center' },
-	                'Sign In'
+	                'Sign Up'
 	              ),
 	              React.createElement(
 	                'p',
