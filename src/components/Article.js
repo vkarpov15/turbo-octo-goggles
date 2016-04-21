@@ -22,7 +22,7 @@ const DeleteButton = props => {
       </span>
     );
   }
-  return;
+  return null;
 };
 
 const Comment = props => {
